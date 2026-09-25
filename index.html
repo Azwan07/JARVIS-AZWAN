@@ -43,3 +43,421 @@ textarea{min-height:70px;resize:vertical}
 <div class="panel"><div class="small">JARVIS LOG</div><div id="log" class="log"></div></div>
 <div class="panel"><div class="small">MEMORY</div><div id="memory" class="small">Local context active</div></div>
 </main>
+
+<script>
+const $=id=>document.getElementById(id);
+const state={
+  mode:"Normal",
+  workLoop:false,
+  listening:false,
+  lang:"ms-MY",
+  memory:JSON.parse(localStorage.getItem("jarvis_memory")||"[]")
+};
+
+const modes=[
+"Normal","Rapid Response","Work","Urgent Work","Private","Ambient",
+"Task","Document","Cafe","Vendor","Inventory","Payment",
+"Licence","Report","English Coach","Mandarin","Investment",
+"Stock Analysis","Market Watch","Trading Alert","Risk Analysis",
+"Trade Preparation","Vision","Computer","Browser","Coding",
+"Security","Meeting","Expense","Advisor"
+];
+
+$("modes").innerHTML=modes.map(x=>
+  `<button class="mode ${x==="Normal"?"active":""}" data-mode="${x}">${x}</button>`
+).join("");
+
+function log(msg){
+  const t=new Date().toLocaleTimeString();
+  $("log").textContent+=`[${t}] ${msg}\n`;
+  $("log").scrollTop=$("log").scrollHeight;
+}
+
+function saveMemory(text){
+  state.memory.push({
+    text,
+    time:new Date().toISOString()
+  });
+  state.memory=state.memory.slice(-50);
+  localStorage.setItem("jarvis_memory",JSON.stringify(state.memory));
+  $("memory").textContent=`${state.memory.length} local context item${state.memory.length===1?"":"s"} stored`;
+}
+
+function detectLang(text){
+  const t=text.toLowerCase();
+
+  const malay=[
+    "aku","saya","kau","awak","anda","boleh","nak","mahu","tolong",
+    "buat","buatkan","sekarang","nanti","dah","sudah","tak","tidak",
+    "apa","kenapa","macam","mana","ini","itu","untuk","dengan",
+    "kerja","laporan","harga","semak","cari","buka","tutup",
+    "ingat","jangan","pergi","datang","kita","mereka","berapa"
+  ];
+
+  const english=[
+    "the","this","that","what","why","how","can","could","please",
+    "make","create","check","search","open","close","remember",
+    "work","report","price","find","show","tell","give","where",
+    "when","which","with","from","into","about","need","want"
+  ];
+
+  let ms=0,en=0;
+
+  for(const w of malay){
+    if(new RegExp(`\\b${w}\\b`,"i").test(t)) ms++;
+  }
+
+  for(const w of english){
+    if(new RegExp(`\\b${w}\\b`,"i").test(t)) en++;
+  }
+
+  return ms>=en ? "ms-MY" : "en-GB";
+}
+
+function setStatus(text){
+  $("status").textContent=text;
+}
+
+function setTalking(on){
+  $("coreWrap").classList.toggle("talking",on);
+}
+
+function chooseVoice(lang){
+  const voices=speechSynthesis.getVoices();
+
+  if(lang==="ms-MY"){
+    return voices.find(v=>/^ms-MY/i.test(v.lang))
+      ||voices.find(v=>/^ms/i.test(v.lang))
+      ||voices.find(v=>/Malay/i.test(v.name))
+      ||voices.find(v=>/^en-GB/i.test(v.lang))
+      ||voices[0];
+  }
+
+  return voices.find(v=>/^en-GB/i.test(v.lang)&&/Daniel|Oliver|Arthur|Male/i.test(v.name))
+    ||voices.find(v=>/^en-GB/i.test(v.lang))
+    ||voices.find(v=>/^en/i.test(v.lang))
+    ||voices[0];
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+
+  speechSynthesis.cancel();
+
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=state.lang==="ms-MY"?"ms-MY":"en-GB";
+  u.rate=0.96;
+  u.pitch=0.9;
+
+  const voice=chooseVoice(u.lang);
+  if(voice) u.voice=voice;
+
+  u.onstart=()=>{
+    setTalking(true);
+    setStatus("SPEAKING");
+  };
+
+  u.onend=()=>{
+    setTalking(false);
+    setStatus(state.workLoop?"WORK LISTENING":"READY");
+  };
+
+  u.onerror=()=>{
+    setTalking(false);
+    setStatus("READY");
+  };
+
+  speechSynthesis.speak(u);
+}
+
+function responseFor(text){
+  const t=text.toLowerCase().trim();
+
+  if(!t){
+    return state.lang==="ms-MY"
+      ?"Saya dengar."
+      :"I'm listening.";
+  }
+
+  if(/^(hi|hello|hey|hai|assalamualaikum)\b/.test(t)){
+    return state.lang==="ms-MY"
+      ?"Ya, Azwan. Saya di sini."
+      :"Yes, Azwan. I'm here.";
+  }
+
+  if(t.includes("who are you")||t.includes("siapa kau")||t.includes("siapa awak")){
+    return state.lang==="ms-MY"
+      ?"Saya JARVIS AZWAN, gateway pembantu peribadi anda."
+      :"I am JARVIS AZWAN, your personal assistant gateway.";
+  }
+
+  if(t.includes("what can you do")||t.includes("boleh buat apa")){
+    return state.lang==="ms-MY"
+      ?"Saya boleh menerima arahan suara atau teks, menyimpan konteks tempatan, membantu kerja, dan menjadi gateway kepada sistem JARVIS yang lebih besar."
+      :"I can accept voice or text commands, retain local context, assist with work, and act as the gateway to the larger JARVIS system.";
+  }
+
+  if(t.includes("remember")||t.includes("ingat")){
+    saveMemory(text);
+    return state.lang==="ms-MY"
+      ?"Baik. Saya simpan dalam memori tempatan sesi ini."
+      :"Understood. I stored that in local memory.";
+  }
+
+  if(t.includes("private")||t.includes("senyap")){
+    setPrivate();
+    return state.lang==="ms-MY"
+      ?"Private Mode diaktifkan."
+      :"Private Mode activated.";
+  }
+
+  if(t.includes("work mode")||t.includes("mode kerja")){
+    setWork();
+    return state.lang==="ms-MY"
+      ?"Work Mode diaktifkan."
+      :"Work Mode activated.";
+  }
+
+  if(t.includes("ambient")||t.includes("ambien")){
+    setAmbient();
+    return state.lang==="ms-MY"
+      ?"Ambient Mode diaktifkan."
+      :"Ambient Mode activated.";
+  }
+
+  if(t.includes("time")||t.includes("pukul berapa")){
+    const now=new Date().toLocaleTimeString(
+      state.lang==="ms-MY"?"ms-MY":"en-GB",
+      {hour:"numeric",minute:"2-digit"}
+    );
+
+    return state.lang==="ms-MY"
+      ?`Sekarang pukul ${now}.`
+      :`The time is ${now}.`;
+  }
+
+  return state.lang==="ms-MY"
+    ?`Baik. Saya terima arahan: ${text}`
+    :`Understood. I received your command: ${text}`;
+}
+
+function handle(text){
+  if(!text)return;
+
+  state.lang=detectLang(text);
+  saveMemory(text);
+
+  log(`YOU [${state.lang}]: ${text}`);
+
+  const reply=responseFor(text);
+
+  log(`JARVIS: ${reply}`);
+  speak(reply);
+}
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+
+if(SR){
+  recognition=new SR();
+  recognition.lang="ms-MY";
+  recognition.continuous=false;
+  recognition.interimResults=false;
+  recognition.maxAlternatives=1;
+
+  recognition.onstart=()=>{
+    state.listening=true;
+    setStatus("LISTENING");
+    log("Microphone listening...");
+  };
+
+  recognition.onresult=e=>{
+    const text=e.results[e.results.length-1][0].transcript.trim();
+
+    if(text){
+      handle(text);
+    }
+  };
+
+  recognition.onerror=e=>{
+    state.listening=false;
+    setStatus("MIC ERROR");
+
+    log(`Microphone error: ${e.error}`);
+
+    if(e.error==="not-allowed"){
+      log("Microphone permission was denied.");
+    }
+  };
+
+  recognition.onnomatch=()=>{
+    log("No speech match detected.");
+    setStatus(state.workLoop?"WORK LISTENING":"READY");
+  };
+
+  recognition.onend=()=>{
+    state.listening=false;
+
+    if(state.workLoop){
+      setStatus("WORK LISTENING");
+
+      setTimeout(()=>{
+        if(state.workLoop && !state.listening){
+          try{
+            recognition.start();
+          }catch(e){}
+        }
+      },350);
+    }else{
+      setStatus("READY");
+    }
+  };
+}else{
+  setStatus("TEXT / TTS ONLY");
+  log("SpeechRecognition is not available in this browser.");
+}
+
+function startListening(){
+  if(!recognition){
+    setStatus("TEXT / TTS ONLY");
+    return;
+  }
+
+  try{
+    recognition.lang=state.lang;
+    recognition.start();
+  }catch(e){}
+}
+
+function stopListening(){
+  if(!recognition)return;
+
+  try{
+    recognition.stop();
+  }catch(e){}
+}
+
+function setWork(){
+  state.mode="Work";
+  state.workLoop=true;
+
+  document.querySelectorAll(".mode").forEach(b=>{
+    b.classList.toggle("active",b.dataset.mode==="Work");
+  });
+
+  setStatus("WORK LISTENING");
+  log("WORK MODE activated.");
+
+  if(recognition && !state.listening){
+    setTimeout(startListening,250);
+  }
+}
+
+function setPrivate(){
+  state.mode="Private";
+  state.workLoop=false;
+
+  stopListening();
+  speechSynthesis.cancel();
+  setTalking(false);
+
+  document.querySelectorAll(".mode").forEach(b=>{
+    b.classList.toggle("active",b.dataset.mode==="Private");
+  });
+
+  setStatus("PRIVATE");
+  log("PRIVATE MODE activated. Microphone OFF.");
+}
+
+function setAmbient(){
+  state.mode="Ambient";
+  state.workLoop=false;
+
+  document.querySelectorAll(".mode").forEach(b=>{
+    b.classList.toggle("active",b.dataset.mode==="Ambient");
+  });
+
+  setStatus("AMBIENT");
+  log("AMBIENT MODE activated.");
+}
+
+document.querySelectorAll(".mode").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const mode=btn.dataset.mode;
+
+    if(mode==="Work"){
+      setWork();
+      return;
+    }
+
+    if(mode==="Private"){
+      setPrivate();
+      return;
+    }
+
+    if(mode==="Ambient"){
+      setAmbient();
+      return;
+    }
+
+    state.mode=mode;
+    state.workLoop=false;
+    stopListening();
+
+    document.querySelectorAll(".mode").forEach(b=>{
+      b.classList.toggle("active",b===btn);
+    });
+
+    setStatus(mode.toUpperCase());
+    log(`${mode} mode selected.`);
+  });
+});
+
+$("mic").addEventListener("click",()=>{
+  if(state.listening){
+    stopListening();
+  }else{
+    startListening();
+  }
+});
+
+$("work").addEventListener("click",()=>{
+  if(state.mode==="Work"&&state.workLoop){
+    state.workLoop=false;
+    stopListening();
+    setStatus("READY");
+    log("WORK MODE stopped.");
+  }else{
+    setWork();
+  }
+});
+
+$("private").addEventListener("click",setPrivate);
+$("ambient").addEventListener("click",setAmbient);
+
+$("send").addEventListener("click",()=>{
+  handle($("cmd").value.trim());
+  $("cmd").value="";
+});
+
+$("cmd").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
+    e.preventDefault();
+    $("send").click();
+  }
+});
+
+speechSynthesis.onvoiceschanged=()=>{
+  log("Voice list refreshed.");
+};
+
+$("memory").textContent=
+  `${state.memory.length} local context item${state.memory.length===1?"":"s"} stored`;
+
+log("JARVIS AZWAN v4.1 initialised.");
+log("Language: Bahasa Malaysia / English adaptive mode.");
+log("Voice: browser/device voice engine.");
+log("Brain: local rule-based gateway.");
+log("Consequential actions remain approval-gated.");
+</script>
+</body></html>
