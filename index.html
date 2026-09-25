@@ -963,123 +963,357 @@ function saveSettings(){
 
 }
 
-function setupSpeech(){
+let micStream = null;
+let recognition = null;
+let listening = false;
+let micStarting = false;
+let recognitionBusy = false;
 
- const SR=
-  window.SpeechRecognition||
-  window.webkitSpeechRecognition;
+async function primeMicrophone(){
 
- if(!SR){
+    if(!navigator.mediaDevices ||
+       !navigator.mediaDevices.getUserMedia){
 
-  $('status').textContent='TEXT / TTS ONLY';
+        throw new Error('Microphone API unavailable');
 
-  return;
+    }
 
- }
+    try{
 
- recognition=new SR();
+        if(micStream){
+            micStream.getTracks().forEach(t=>t.stop());
+        }
 
- recognition.lang='ms-MY';
- recognition.continuous=false;
- recognition.interimResults=false;
+        micStream =
+            await navigator.mediaDevices.getUserMedia({
+                audio:{
+                    echoCancellation:true,
+                    noiseSuppression:true,
+                    autoGainControl:true
+                }
+            });
 
- recognition.onstart=()=>{
+        return true;
 
-  listening=true;
+    }catch(err){
 
-  $('mic').classList.add('on');
+        log('MIC ERROR: '+err.name);
 
-  $('status').textContent='LISTENING';
+        $('status').textContent =
+            'MIC PERMISSION ERROR';
 
- };
+        $('voiceState').textContent =
+            'MIC ERROR • '+err.name;
 
- recognition.onresult=e=>{
+        return false;
+    }
+}
 
-  let text=
-   e.results[0][0].transcript;
 
-  let lang=detectLang(text);
+function createRecognition(){
 
-  recognition.lang=lang;
+    const SR =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
 
-  handle(text);
+    if(!SR){
 
- };
+        $('status').textContent =
+            'SPEECH API UNAVAILABLE';
 
- recognition.onerror=()=>{
+        $('voiceState').textContent =
+            'SPEECH RECOGNITION UNSUPPORTED';
 
-  listening=false;
+        return null;
+    }
 
-  $('mic').classList.remove('on');
+    const r = new SR();
 
-  $('status').textContent='CORE ONLINE';
+    r.continuous = false;
+    r.interimResults = false;
+    r.maxAlternatives = 1;
 
- };
+    /*
+       Start in Malay because Bahasa Malaysia
+       is JARVIS AZWAN's primary conversation language.
+    */
+    r.lang = 'ms-MY';
 
- recognition.onend=()=>{
+    r.onstart = ()=>{
 
-  listening=false;
+        listening = true;
+        micStarting = false;
+        recognitionBusy = true;
 
-  $('mic').classList.remove('on');
+        $('mic').classList.add('on');
 
-  $('status').textContent='CORE ONLINE';
+        $('status').textContent =
+            'LISTENING';
 
-  if(
-   state.mode==='Work' &&
-   document.visibilityState==='visible' &&
-   state.workLoop
-  ){
+        $('voiceState').textContent =
+            'LISTENING • MS-MY';
 
-   setTimeout(startListen,350);
+        log('MIC: recognition started');
 
-  }
+    };
 
- };
+
+    r.onresult = e=>{
+
+        if(!e.results ||
+           !e.results.length)return;
+
+        const result =
+            e.results[e.results.length-1];
+
+        if(!result ||
+           !result[0])return;
+
+        const text =
+            result[0].transcript.trim();
+
+        if(!text)return;
+
+        log('MIC TRANSCRIPT: '+text);
+
+        /*
+           Stop recognition BEFORE JARVIS speaks.
+           This is important on iOS Safari.
+        */
+        try{
+            r.stop();
+        }catch(e){}
+
+        listening = false;
+        recognitionBusy = false;
+
+        $('mic').classList.remove('on');
+
+        $('status').textContent =
+            'PROCESSING';
+
+        handle(text);
+
+    };
+
+
+    r.onerror = e=>{
+
+        listening = false;
+        micStarting = false;
+        recognitionBusy = false;
+
+        $('mic').classList.remove('on');
+
+        log(
+            'MIC ERROR: '+
+            (e.error || 'unknown')
+        );
+
+        if(e.error === 'not-allowed'){
+
+            $('status').textContent =
+                'MIC PERMISSION DENIED';
+
+            $('voiceState').textContent =
+                'ALLOW MICROPHONE';
+
+        }
+        else if(e.error === 'no-speech'){
+
+            $('status').textContent =
+                'NO SPEECH DETECTED';
+
+        }
+        else if(e.error === 'service-not-allowed'){
+
+            $('status').textContent =
+                'SPEECH SERVICE BLOCKED';
+
+        }
+        else{
+
+            $('status').textContent =
+                'MIC ERROR';
+
+        }
+
+    };
+
+
+    r.onend = ()=>{
+
+        listening = false;
+        micStarting = false;
+        recognitionBusy = false;
+
+        $('mic').classList.remove('on');
+
+        if(
+            $('status').textContent === 'LISTENING'
+        ){
+
+            $('status').textContent =
+                'CORE ONLINE';
+
+        }
+
+    };
+
+    return r;
+}
+
+
+async function startListen(){
+
+    if(state.mode === 'Private'){
+        return;
+    }
+
+    if(listening ||
+       micStarting ||
+       recognitionBusy){
+
+        return;
+    }
+
+    micStarting = true;
+
+    $('status').textContent =
+        'MIC INITIALISING';
+
+    $('voiceState').textContent =
+        'REQUESTING MICROPHONE';
+
+    /*
+       Explicitly request microphone permission first.
+       This makes Safari initialise the audio session
+       before SpeechRecognition starts.
+    */
+    const micOK =
+        await primeMicrophone();
+
+    if(!micOK){
+
+        micStarting = false;
+        return;
+    }
+
+    /*
+       Re-create the recognizer every time.
+       This avoids the stuck SpeechRecognition
+       session problem seen on iOS Safari.
+    */
+    recognition =
+        createRecognition();
+
+    if(!recognition){
+
+        micStarting = false;
+        return;
+    }
+
+    /*
+       Give iOS a short moment after microphone
+       activation before starting recognition.
+    */
+    setTimeout(()=>{
+
+        if(!recognition ||
+           listening){
+
+            micStarting = false;
+            return;
+        }
+
+        try{
+
+            recognition.start();
+
+        }catch(err){
+
+            log(
+                'MIC START ERROR: '+
+                err.message
+            );
+
+            micStarting = false;
+
+            $('status').textContent =
+                'MIC START FAILED';
+
+        }
+
+    },250);
 
 }
 
-function startListen(){
-
- if(
-  state.mode==='Private'||
-  !recognition||
-  listening
- )return;
-
- try{
-
-  recognition.start();
-
- }catch(e){}
-
-}
 
 function stopListen(){
 
- state.workLoop=false;
+    state.workLoop = false;
 
- if(
-  recognition&&
-  listening
- ){
+    if(recognition){
 
-  try{
-   recognition.stop();
-  }catch(e){}
+        try{
+            recognition.abort();
+        }catch(e){}
 
- }
+        recognition = null;
+    }
 
- listening=false;
+    if(micStream){
 
- $('mic').classList.remove('on');
+        micStream
+            .getTracks()
+            .forEach(t=>t.stop());
 
- $('status').textContent='MIC OFF';
+        micStream = null;
+    }
 
- persist();
+    listening = false;
+    micStarting = false;
+    recognitionBusy = false;
+
+    $('mic').classList.remove('on');
+
+    $('status').textContent =
+        'MIC OFF';
+
+    $('voiceState').textContent =
+        'MIC OFF';
+
+    persist();
 
 }
 
+
 function toggleListen(){
+
+    if(listening ||
+       micStarting ||
+       recognitionBusy){
+
+        stopListen();
+        return;
+    }
+
+    if(state.mode === 'Private'){
+
+        say(
+            'Private mode is active. Microphone is off.'
+        );
+
+        return;
+    }
+
+    state.workLoop = false;
+
+    persist();
+
+    startListen();
+
+}
 
  if(listening){
 
