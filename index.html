@@ -1,466 +1,1137 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050505"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="JARVIS AZWAN"><link rel="manifest" href="manifest.webmanifest"><title>JARVIS AZWAN</title><style>
-:root{--bg:#020202;--p:#0d0906;--orange:#ff8a00;--amber:#ffc15a;--cyan:#00e5ff;--white:#f4f4f4;--muted:#8c8176;--red:#ff3b30}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100%;overflow-x:hidden}body{min-height:100vh}
-button,input,textarea{font:inherit}button{color:inherit}
-.app{max-width:1100px;margin:auto;min-height:100vh;padding:16px 16px 40px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.brand{letter-spacing:.18em;font-size:12px;color:var(--amber);font-weight:700}
-.status{font-size:10px;letter-spacing:.12em;color:var(--muted)}
-.coreWrap{position:relative;width:min(76vw,430px);aspect-ratio:1;margin:28px auto 14px;display:grid;place-items:center}
-.coreGlow{position:absolute;inset:7%;border-radius:50%;background:radial-gradient(circle,rgba(255,138,0,.28),rgba(255,138,0,.08) 42%,transparent 68%);filter:blur(18px);animation:glow 2.5s ease-in-out infinite}
-.core{position:relative;width:88%;height:88%;border-radius:50%;overflow:hidden;border:1px solid rgba(255,161,42,.6);box-shadow:0 0 35px rgba(255,138,0,.35),inset 0 0 35px rgba(255,138,0,.16);background:#090604}
-.core img{width:100%;height:100%;object-fit:cover;display:block}
-.ring{position:absolute;inset:1%;border:1px solid rgba(255,177,71,.4);border-radius:50%;animation:spin 18s linear infinite}
-.ring.r2{inset:8%;border-style:dashed;animation:spin 11s linear reverse infinite;opacity:.65}
-.talk{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,193,90,.0);pointer-events:none}
-.talking .talk{animation:pulse .7s ease-in-out infinite}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes glow{50%{transform:scale(1.05);opacity:.75}}@keyframes pulse{50%{transform:scale(1.04);border-color:rgba(255,193,90,.8)}}
-.panel{border:1px solid rgba(255,138,0,.35);background:linear-gradient(180deg,rgba(20,12,6,.82),rgba(5,5,5,.88));border-radius:14px;padding:14px;margin-top:12px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.mode{font-size:11px;letter-spacing:.12em;color:var(--cyan);border:1px solid rgba(255,138,0,.4);padding:7px 9px;border-radius:8px;background:#070707}
-.mode.active{background:rgba(0,229,255,.08);border-color:var(--orange)}
-.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.btn{border:1px solid rgba(255,138,0,.5);background:#0a0705;border-radius:10px;padding:12px 10px;min-height:46px}
-.btn:active{transform:scale(.98)}
-.btn.primary{background:rgba(255,138,0,.12);border-color:var(--orange)}
-.btn.cyan{color:var(--cyan)}
-.log{height:160px;overflow:auto;font-size:12px;line-height:1.5;color:#d7d0ca;white-space:pre-wrap}
-input,textarea{width:100%;background:#050505;border:1px solid rgba(255,138,0,.35);border-radius:9px;color:white;padding:11px;outline:none}
-textarea{min-height:70px;resize:vertical}
-.small{font-size:10px;color:var(--muted)}
-@media(min-width:700px){.controls{grid-template-columns:repeat(4,1fr)}}
-</style></head><body><main class="app">
-<div class="top"><div class="brand">JARVIS AZWAN</div><div id="status" class="status">READY</div></div>
-<div id="coreWrap" class="coreWrap"><div class="coreGlow"></div><div class="core"><img src="assets/jarvis-core-reference.png" alt="JARVIS Core"><div class="ring"></div><div class="ring r2"></div><div class="talk"></div></div></div>
-<div class="panel"><div class="small">COMMAND MODES</div><div class="row" id="modes"></div></div>
-<div class="panel"><div class="controls">
-<button class="btn primary" id="mic">🎙️ LISTEN</button>
-<button class="btn cyan" id="work">WORK MODE</button>
-<button class="btn" id="private">PRIVATE</button>
-<button class="btn" id="ambient">AMBIENT</button>
-</div></div>
-<div class="panel"><div class="small">COMMAND</div><textarea id="cmd" placeholder="Type a command or use the microphone..."></textarea><button class="btn primary" id="send" style="width:100%;margin-top:8px">EXECUTE</button></div>
-<div class="panel"><div class="small">JARVIS LOG</div><div id="log" class="log"></div></div>
-<div class="panel"><div class="small">MEMORY</div><div id="memory" class="small">Local context active</div></div>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JARVIS AZWAN">
+<link rel="manifest" href="manifest.webmanifest">
+<title>JARVIS AZWAN</title>
+
+<style>
+:root{
+ --bg:#020202;
+ --p:#0d0906d9;
+ --o:#ff8a00;
+ --a:#ffc15a;
+ --c:#63d8ff;
+ --w:#eee8e1;
+ --m:#8e8379;
+ --l:#ff8a0070
+}
+*{box-sizing:border-box}
+html,body{
+ margin:0;
+ background:#020202;
+ color:var(--w);
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif
+}
+body{
+ min-height:100vh;
+ background:radial-gradient(circle at 50% 32%,#321600 0,#090604 30%,#020202 70%);
+ overflow-x:hidden
+}
+.app{
+ max-width:920px;
+ margin:auto;
+ padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 22px)
+}
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:9px}
+.mark{
+ width:40px;height:40px;border:1px solid var(--o);
+ border-radius:50%;display:grid;place-items:center;
+ box-shadow:0 0 24px #ff8a0055
+}
+.mark i{
+ width:13px;height:13px;border-radius:50%;
+ background:var(--o);box-shadow:0 0 20px var(--o)
+}
+.brand b{letter-spacing:4px;color:var(--o);font-size:20px}
+.brand small{display:block;letter-spacing:3px;color:var(--a)}
+.pill{
+ font-size:10px;border:1px solid var(--l);
+ border-radius:20px;padding:7px 10px;color:var(--a)
+}
+.panel{
+ margin-top:10px;
+ background:linear-gradient(145deg,#1b0e06c7,#050505e8);
+ border:1px solid var(--l);
+ clip-path:polygon(
+ 0 9px,9px 0,calc(100% - 9px) 0,100% 9px,
+ 100% calc(100% - 9px),calc(100% - 9px) 100%,
+ 9px 100%,0 calc(100% - 9px)
+ );
+ padding:13px;
+ box-shadow:0 0 30px #ff7b0010
+}
+.greet h1{font-size:22px;margin:0;color:var(--o)}
+.greet p{margin:4px 0 0;color:#c8bfb7;font-size:12px}
+
+.hero{
+ height:370px;
+ display:grid;
+ place-items:center;
+ position:relative;
+ overflow:hidden
+}
+
+.core{
+ width:325px;
+ height:325px;
+ border-radius:50%;
+ position:relative;
+ display:grid;
+ place-items:center;
+ filter:drop-shadow(0 0 28px #ff850088);
+ transition:.25s
+}
+
+.core img{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ border-radius:50%;
+ mix-blend-mode:screen;
+ opacity:.88
+}
+
+.core:before,.core:after{
+ content:"";
+ position:absolute;
+ border-radius:50%;
+ inset:2px;
+ border:1px solid #ffb13b88;
+ box-shadow:inset 0 0 35px #ff8a0044,0 0 30px #ff8a0033
+}
+
+.core:after{
+ inset:-14px;
+ border:1px dashed #ff8a0070;
+ animation:spin 13s linear infinite
+}
+
+.core .r2{
+ position:absolute;
+ inset:27px;
+ border:1px solid #ffc15a55;
+ border-radius:50%;
+ animation:spin 9s linear infinite reverse
+}
+
+.core .label{
+ text-align:center;
+ position:absolute;
+ text-shadow:0 0 10px #000;
+ font-weight:700;
+ letter-spacing:4px;
+ color:#ffd27b
+}
+
+.core .label small{
+ display:block;
+ font-size:8px;
+ letter-spacing:3px;
+ color:#fff1cf;
+ margin-top:3px
+}
+
+.core.talking{
+ animation:talk .72s ease-in-out infinite
+}
+
+.core.talking:after{
+ box-shadow:0 0 45px #ff8a00aa
+}
+
+@keyframes spin{
+ to{transform:rotate(360deg)}
+}
+
+@keyframes talk{
+ 50%{transform:scale(1.045)}
+}
+
+.mini{
+ position:absolute;
+ top:12px;
+ font-size:9px;
+ letter-spacing:2px;
+ color:var(--c);
+ opacity:.85
+}
+
+.modes{
+ display:flex;
+ gap:7px;
+ overflow:auto
+}
+
+.mode{
+ white-space:nowrap;
+ border:1px solid #ff8a0060;
+ background:#061018;
+ color:var(--c);
+ border-radius:18px;
+ padding:8px 10px;
+ font-size:10px
+}
+
+.mode.active{
+ border-color:var(--o);
+ box-shadow:0 0 15px #ff8a0020;
+ background:#211006
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px
+}
+
+.grid .panel{margin-top:10px}
+
+.h{
+ font-size:10px;
+ letter-spacing:1.5px;
+ color:var(--a);
+ margin-bottom:8px
+}
+
+.metric{
+ display:flex;
+ justify-content:space-between;
+ font-size:11px;
+ padding:5px 0;
+ border-bottom:1px solid #ffffff0d
+}
+
+.metric span:last-child{color:var(--a)}
+
+.reply{
+ font-size:12px;
+ line-height:1.5;
+ white-space:pre-wrap;
+ min-height:50px
+}
+
+.quick{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:7px
+}
+
+.quick button,.action{
+ background:#0b0907;
+ border:1px solid #ff8a0055;
+ color:var(--a);
+ border-radius:9px;
+ padding:9px 5px;
+ font-size:10px
+}
+
+.devices{display:flex;gap:7px}
+
+.device{
+ flex:1;
+ border:1px solid #ff8a0045;
+ padding:9px;
+ border-radius:9px;
+ font-size:10px
+}
+
+.device b{
+ color:var(--c);
+ display:block;
+ margin-bottom:3px
+}
+
+.command{
+ display:flex;
+ gap:7px;
+ position:sticky;
+ bottom:8px;
+ margin-top:10px
+}
+
+.command input{
+ min-width:0;
+ flex:1;
+ border:1px solid #ff8a0070;
+ background:#080706;
+ color:#fff;
+ border-radius:25px;
+ padding:13px;
+ outline:none
+}
+
+.mic{
+ width:48px;
+ border:1px solid var(--o);
+ border-radius:50%;
+ background:#130b04;
+ color:var(--o);
+ font-size:18px
+}
+
+.mic.on{
+ box-shadow:0 0 20px #ff8a0066
+}
+
+.footer{
+ text-align:center;
+ color:#655d56;
+ font-size:9px;
+ margin:12px 0
+}
+
+.settings{display:none}
+.settings.open{display:block}
+
+.field{
+ display:flex;
+ gap:7px;
+ margin:7px 0
+}
+
+.field input,.field select{
+ flex:1;
+ background:#080706;
+ color:#fff;
+ border:1px solid #ff8a0050;
+ border-radius:8px;
+ padding:9px
+}
+
+.log{
+ max-height:130px;
+ overflow:auto;
+ font-size:10px;
+ color:#bdb3aa
+}
+
+.ok{color:#83e7b0}
+.warn{color:#ffc15a}
+
+@media(min-width:700px){
+ .hero{height:460px}
+ .core{width:400px;height:400px}
+ .grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<header class="top">
+ <div class="brand">
+  <div class="mark"><i></i></div>
+  <div>
+   <b>JARVIS</b>
+   <small>AZWAN</small>
+  </div>
+ </div>
+ <div class="pill" id="status">CORE ONLINE</div>
+</header>
+
+<section class="panel greet">
+ <h1>GOOD EVENING, AZWAN</h1>
+ <p>Personal AI command centre • iPhone Gateway • Free-first / provider-neutral</p>
+</section>
+
+<section class="panel hero">
+ <div class="mini" id="modeBanner">MODE: WORK • VOICE READY</div>
+
+ <div class="core" id="core">
+  <img src="assets/jarvis-core-reference.png" alt="JARVIS Core">
+  <div class="r2"></div>
+  <div class="label">
+   JARVIS
+   <small>CORE</small>
+  </div>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="h">COMMAND MODES</div>
+ <div class="modes" id="modes"></div>
+</section>
+
+<div class="grid">
+
+<section class="panel">
+ <div class="h">SYSTEM STATUS</div>
+
+ <div class="metric">
+  <span>iPHONE GATEWAY</span>
+  <span class="ok">READY</span>
+ </div>
+
+ <div class="metric">
+  <span>LOCAL MEMORY</span>
+  <span id="mem">ACTIVE</span>
+ </div>
+
+ <div class="metric">
+  <span>AI ROUTER</span>
+  <span id="brain">LOCAL</span>
+ </div>
+
+ <div class="metric">
+  <span>VOICE</span>
+  <span id="voiceState">MALE • EN-GB</span>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="h">WORK / TASKS</div>
+ <div id="tasks" class="reply">No tasks stored.</div>
+ <button class="action" onclick="addTask()">+ ADD TASK</button>
+</section>
+
+<section class="panel">
+ <div class="h">QUICK ACCESS</div>
+
+ <div class="quick">
+  <button onclick="say('Opening browser.')">BROWSER</button>
+  <button onclick="say('Opening notes.')">NOTES</button>
+  <button onclick="say('Work mode ready.')">WORK</button>
+  <button onclick="say('Investment hub is approval gated.')">INVEST</button>
+  <button onclick="say('Cafe maintenance mode ready.')">CAFE</button>
+  <button onclick="showSettings()">SETTINGS</button>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="h">DEVICE LAYER</div>
+
+ <div class="devices">
+  <div class="device">
+   <b>APPLE WATCH 9</b>
+   Quick control target
+  </div>
+
+  <div class="device">
+   <b>RAY-BAN META 2</b>
+   Vision / voice target
+  </div>
+ </div>
+</section>
+
+<section class="panel">
+ <div class="h">JARVIS RESPONSE</div>
+ <div id="reply" class="reply">
+  Ready, Azwan. Say a command.
+ </div>
+</section>
+
+<section class="panel">
+ <div class="h">SECURITY / APPROVAL</div>
+
+ <div class="reply">
+Consequential external actions require explicit owner approval.
+Financial BUY/SELL/DEPOSIT/WITHDRAW/TRANSFER remain approval-gated.
+No keys or seed phrases stored.
+ </div>
+</section>
+
+</div>
+
+<section class="panel settings" id="settings">
+
+ <div class="h">VOICE / BRAIN SETTINGS</div>
+
+ <div class="field">
+  <select id="voiceSelect"></select>
+  <button class="action" onclick="saveSettings()">SAVE</button>
+ </div>
+
+ <div class="field">
+  <input
+   id="endpoint"
+   placeholder="Optional OpenAI-compatible endpoint (leave blank for local brain)"
+  >
+ </div>
+
+ <div class="log" id="log"></div>
+
+</section>
+
+<div class="command">
+
+ <input
+  id="cmd"
+  placeholder="Say or type: Jarvis, what should I do next?"
+ >
+
+ <button
+  class="mic"
+  id="mic"
+  onclick="toggleListen()"
+ >
+  🎙
+ </button>
+
+</div>
+
+<div class="footer">
+ JARVIS AZWAN v4.2 • Free-first • No embedded secrets • Foreground voice on iPhone
+</div>
+
 </main>
 
 <script>
-const $=id=>document.getElementById(id);
-const state={
-  mode:"Normal",
-  workLoop:false,
-  listening:false,
-  lang:"ms-MY",
-  memory:JSON.parse(localStorage.getItem("jarvis_memory")||"[]")
-};
+
+const KEY='jarvis_azwan_v4';
+
+let state=JSON.parse(localStorage.getItem(KEY)||'{}');
+
+state.mode=state.mode||'Work';
+state.lang=state.lang||'ms-MY';
+state.tasks=state.tasks||[];
+state.turns=state.turns||[];
+state.logs=state.logs||[];
+
+let recognition=null;
+let listening=false;
+let speaking=false;
 
 const modes=[
-"Normal","Rapid Response","Work","Urgent Work","Private","Ambient",
-"Task","Document","Cafe","Vendor","Inventory","Payment",
-"Licence","Report","English Coach","Mandarin","Investment",
-"Stock Analysis","Market Watch","Trading Alert","Risk Analysis",
-"Trade Preparation","Vision","Computer","Browser","Coding",
-"Security","Meeting","Expense","Advisor"
+'Normal',
+'Rapid Response',
+'Ambient',
+'Private',
+'Work',
+'Urgent Work',
+'Autonomous Work',
+'Task',
+'Document',
+'Cafe',
+'Vendor',
+'Inventory',
+'Payment-Ledger',
+'Licence-Renewal',
+'Report-Drafting',
+'English Coach',
+'Mandarin Negotiation',
+'Investment',
+'Stock Analysis',
+'Market Watch',
+'Trading Alert',
+'Risk Analysis',
+'Trade Preparation',
+'Trade Approval',
+'Vision',
+'Ray-Ban Meta',
+'iPhone',
+'Apple Watch',
+'Browser',
+'Camera Analysis',
+'Coding',
+'Testing',
+'Security',
+'Audit',
+'Find It',
+'Meeting',
+'Expense-Cost',
+'Always-On',
+'Interior Design'
 ];
 
-$("modes").innerHTML=modes.map(x=>
-  `<button class="mode ${x==="Normal"?"active":""}" data-mode="${x}">${x}</button>`
-).join("");
+const $=id=>document.getElementById(id);
 
-function log(msg){
-  const t=new Date().toLocaleTimeString();
-  $("log").textContent+=`[${t}] ${msg}\n`;
-  $("log").scrollTop=$("log").scrollHeight;
+function persist(){
+
+ localStorage.setItem(KEY,JSON.stringify(state));
+
+ $('mem').textContent=
+   'ACTIVE • '+state.turns.length+' TURNS';
+
 }
 
-function saveMemory(text){
-  state.memory.push({
-    text,
-    time:new Date().toISOString()
-  });
-  state.memory=state.memory.slice(-50);
-  localStorage.setItem("jarvis_memory",JSON.stringify(state.memory));
-  $("memory").textContent=`${state.memory.length} local context item${state.memory.length===1?"":"s"} stored`;
+function renderModes(){
+
+ $('modes').innerHTML=modes.map(m=>
+  `<button class="mode ${m===state.mode?'active':''}"
+   onclick="setMode('${m.replace(/'/g,"\\'")}')">
+   ${m}
+  </button>`
+ ).join('');
+
+}
+
+function setMode(m){
+
+ state.mode=m;
+
+ if(m==='Private'){
+
+  stopListen();
+
+  $('modeBanner').textContent=
+   'MODE: PRIVATE • MICROPHONE OFF';
+
+ }else{
+
+  $('modeBanner').textContent=
+   'MODE: '+m.toUpperCase()+' • VOICE READY';
+
+ }
+
+ renderModes();
+ persist();
+
+ say(
+  m==='Work'
+   ?'Work mode active. I am ready for your instructions.'
+   :m==='Private'
+    ?'Private mode. Microphone is off.'
+    :m+' mode active.'
+ );
+
+}
+
+function log(x){
+
+ state.logs.unshift(
+  new Date().toLocaleTimeString()+' — '+x
+ );
+
+ state.logs=state.logs.slice(0,40);
+
+ $('log').textContent=state.logs.join('\n');
+
+ persist();
+
+}
+
+let selectedVoice=null;
+
+function maleVoiceCandidates(){
+
+ let vs=speechSynthesis.getVoices();
+
+ return vs.filter(v=>
+  /Daniel|Oliver|Arthur|Alex|Fred|Tom|George|James|Google UK English Male|Microsoft.*(David|George|Mark|Ryan|Male).*English/i
+  .test(v.name)
+  ||
+  /\bmale\b/i.test(v.name)
+ );
+
+}
+
+function chooseVoice(){
+
+ let vs=speechSynthesis.getVoices();
+
+ let saved=localStorage.getItem('jarvisVoice');
+
+ let savedVoice=
+  vs.find(v=>v.name===saved);
+
+ if(savedVoice)return savedVoice;
+
+ let candidates=maleVoiceCandidates();
+
+ let v=
+  candidates.find(v=>/^en-GB/i.test(v.lang))
+  ||
+  candidates.find(v=>/^en/i.test(v.lang))
+  ||
+  candidates[0]
+  ||
+  null;
+
+ selectedVoice=v;
+
+ return v;
+
+}
+
+function setTalking(v){
+
+ speaking=v;
+
+ $('core').classList.toggle('talking',v);
+
+ $('voiceState').textContent=
+  v
+   ?(
+      selectedVoice
+       ?`SPEAKING • ${selectedVoice.lang}`
+       :'SPEAKING • VOICE NOT LOCKED'
+     )
+   :(
+      selectedVoice
+       ?`MALE • ${selectedVoice.lang}`
+       :'MALE VOICE UNAVAILABLE'
+     );
+
+}
+
+function say(text){
+
+ $('reply').textContent=text;
+
+ if(!('speechSynthesis' in window))return;
+
+ speechSynthesis.cancel();
+
+ let v=chooseVoice();
+
+ if(!v){
+
+  $('voiceState').textContent=
+   'MALE VOICE UNAVAILABLE';
+
+  log(
+   'No verified male device voice is available; refusing female fallback.'
+  );
+
+  return;
+
+ }
+
+ selectedVoice=v;
+
+ let u=
+  new SpeechSynthesisUtterance(text);
+
+ u.voice=v;
+ u.lang=v.lang||'en-GB';
+ u.rate=.92;
+ u.pitch=.88;
+
+ u.onstart=()=>setTalking(true);
+
+ u.onend=()=>setTalking(false);
+
+ u.onerror=()=>setTalking(false);
+
+ speechSynthesis.speak(u);
+
+ state.turns.push({
+  role:'assistant',
+  text,
+  time:Date.now()
+ });
+
+ state.turns=state.turns.slice(-40);
+
+ log('JARVIS: '+text);
+
 }
 
 function detectLang(text){
-  const t=text.toLowerCase();
 
-  const malay=[
-    "aku","saya","kau","awak","anda","boleh","nak","mahu","tolong",
-    "buat","buatkan","sekarang","nanti","dah","sudah","tak","tidak",
-    "apa","kenapa","macam","mana","ini","itu","untuk","dengan",
-    "kerja","laporan","harga","semak","cari","buka","tutup",
-    "ingat","jangan","pergi","datang","kita","mereka","berapa"
-  ];
+ let t=text.toLowerCase();
 
-  const english=[
-    "the","this","that","what","why","how","can","could","please",
-    "make","create","check","search","open","close","remember",
-    "work","report","price","find","show","tell","give","where",
-    "when","which","with","from","into","about","need","want"
-  ];
+ let ms=[
+  'aku','saya','kau','awak','boleh','nak','mahu',
+  'tolong','buat','sekarang','dah','tak','tidak',
+  'apa','kenapa','macam','mana','ini','itu','untuk',
+  'dengan','kerja','laporan','harga','semak','cari',
+  'buka','ingat','jangan','kita','berapa','hai'
+ ];
 
-  let ms=0,en=0;
+ let en=[
+  'the','this','that','what','why','how','can',
+  'please','make','create','check','search','open',
+  'close','remember','work','report','price','find',
+  'show','tell','where','when','which','need','want'
+ ];
 
-  for(const w of malay){
-    if(new RegExp(`\\b${w}\\b`,"i").test(t)) ms++;
-  }
+ let m=ms.filter(w=>
+  new RegExp('\\b'+w+'\\b','i').test(t)
+ ).length;
 
-  for(const w of english){
-    if(new RegExp(`\\b${w}\\b`,"i").test(t)) en++;
-  }
+ let e=en.filter(w=>
+  new RegExp('\\b'+w+'\\b','i').test(t)
+ ).length;
 
-  return ms>=en ? "ms-MY" : "en-GB";
+ return m>=e?'ms-MY':'en-GB';
+
 }
 
-function setStatus(text){
-  $("status").textContent=text;
-}
+function brain(text){
 
-function setTalking(on){
-  $("coreWrap").classList.toggle("talking",on);
-}
+ let t=text.toLowerCase();
 
-function chooseVoice(lang){
-  const voices=speechSynthesis.getVoices();
+ let ms=detectLang(text)==='ms-MY';
 
-  if(lang==="ms-MY"){
-    return voices.find(v=>/^ms-MY/i.test(v.lang))
-      ||voices.find(v=>/^ms/i.test(v.lang))
-      ||voices.find(v=>/Malay/i.test(v.name))
-      ||voices.find(v=>/^en-GB/i.test(v.lang))
-      ||voices[0];
+ if(/private|senyap/.test(t))
+  return setMode('Private');
+
+ if(/work mode|mode kerja/.test(t))
+  return setMode('Work');
+
+ if(/ambient|ambien/.test(t))
+  return setMode('Ambient');
+
+ if(
+  /stop listening|mute microphone|berhenti dengar|tutup mikrofon/.test(t)
+ ){
+
+  stopListen();
+
+  return say(
+   ms
+    ?'Mikrofon dihentikan.'
+    :'Microphone listening stopped.'
+  );
+
+ }
+
+ if(/what mode|current mode|mode apa/.test(t))
+
+  return say(
+   ms
+    ?'Mode semasa ialah '+state.mode+'.'
+    :'Current mode is '+state.mode+'.'
+  );
+
+ if(
+  /what did i forget|tasks|to-do|apa perlu buat|tugas/.test(t)
+ ){
+
+  return say(
+   state.tasks.length
+    ?state.tasks.map((x,i)=>`${i+1}. ${x}`).join('\n')
+    :(ms
+      ?'Tiada tugasan disimpan.'
+      :'You have no stored tasks.')
+  );
+
+ }
+
+ if(
+  /add task|remind me|tambah tugas|ingatkan saya/.test(t)
+ ){
+
+  let x=text.replace(
+   /add task|remind me|tambah tugas|ingatkan saya/ig,
+   ''
+  ).trim();
+
+  if(x){
+
+   state.tasks.push(x);
+
+   renderTasks();
+   persist();
+
+   return say(
+    ms
+     ?'Tugasan disimpan.'
+     :'Task stored.'
+   );
+
   }
 
-  return voices.find(v=>/^en-GB/i.test(v.lang)&&/Daniel|Oliver|Arthur|Male/i.test(v.name))
-    ||voices.find(v=>/^en-GB/i.test(v.lang))
-    ||voices.find(v=>/^en/i.test(v.lang))
-    ||voices[0];
-}
+ }
 
-function speak(text){
-  if(!("speechSynthesis" in window)) return;
+ if(
+  /investment|buy|sell|trade|pelaburan|beli|jual/.test(t)
+ ){
 
-  speechSynthesis.cancel();
+  return say(
+   ms
+    ?'Analisis pelaburan boleh menyediakan bukti dan cadangan, tetapi transaksi kewangan memerlukan kelulusan jelas anda.'
+    :'Investment analysis can prepare evidence and a recommendation, but any financial transaction requires your explicit approval.'
+  );
 
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang=state.lang==="ms-MY"?"ms-MY":"en-GB";
-  u.rate=0.96;
-  u.pitch=0.9;
+ }
 
-  const voice=chooseVoice(u.lang);
-  if(voice) u.voice=voice;
+ if(/hello|hi jarvis|hey jarvis|hai jarvis|hai/.test(t))
 
-  u.onstart=()=>{
-    setTalking(true);
-    setStatus("SPEAKING");
-  };
+  return say(
+   ms
+    ?'Selamat malam, Azwan. JARVIS sedia.'
+    :'Good evening, Azwan. JARVIS is ready.'
+  );
 
-  u.onend=()=>{
-    setTalking(false);
-    setStatus(state.workLoop?"WORK LISTENING":"READY");
-  };
+ return say(
+  ms
+   ?'Baik, Azwan. Saya terima arahan itu dan simpan dalam konteks semasa.'
+   :'Understood, Azwan. I have recorded that command in the current context. Full external execution remains permission-gated.'
+ );
 
-  u.onerror=()=>{
-    setTalking(false);
-    setStatus("READY");
-  };
-
-  speechSynthesis.speak(u);
-}
-
-function responseFor(text){
-  const t=text.toLowerCase().trim();
-
-  if(!t){
-    return state.lang==="ms-MY"
-      ?"Saya dengar."
-      :"I'm listening.";
-  }
-
-  if(/^(hi|hello|hey|hai|assalamualaikum)\b/.test(t)){
-    return state.lang==="ms-MY"
-      ?"Ya, Azwan. Saya di sini."
-      :"Yes, Azwan. I'm here.";
-  }
-
-  if(t.includes("who are you")||t.includes("siapa kau")||t.includes("siapa awak")){
-    return state.lang==="ms-MY"
-      ?"Saya JARVIS AZWAN, gateway pembantu peribadi anda."
-      :"I am JARVIS AZWAN, your personal assistant gateway.";
-  }
-
-  if(t.includes("what can you do")||t.includes("boleh buat apa")){
-    return state.lang==="ms-MY"
-      ?"Saya boleh menerima arahan suara atau teks, menyimpan konteks tempatan, membantu kerja, dan menjadi gateway kepada sistem JARVIS yang lebih besar."
-      :"I can accept voice or text commands, retain local context, assist with work, and act as the gateway to the larger JARVIS system.";
-  }
-
-  if(t.includes("remember")||t.includes("ingat")){
-    saveMemory(text);
-    return state.lang==="ms-MY"
-      ?"Baik. Saya simpan dalam memori tempatan sesi ini."
-      :"Understood. I stored that in local memory.";
-  }
-
-  if(t.includes("private")||t.includes("senyap")){
-    setPrivate();
-    return state.lang==="ms-MY"
-      ?"Private Mode diaktifkan."
-      :"Private Mode activated.";
-  }
-
-  if(t.includes("work mode")||t.includes("mode kerja")){
-    setWork();
-    return state.lang==="ms-MY"
-      ?"Work Mode diaktifkan."
-      :"Work Mode activated.";
-  }
-
-  if(t.includes("ambient")||t.includes("ambien")){
-    setAmbient();
-    return state.lang==="ms-MY"
-      ?"Ambient Mode diaktifkan."
-      :"Ambient Mode activated.";
-  }
-
-  if(t.includes("time")||t.includes("pukul berapa")){
-    const now=new Date().toLocaleTimeString(
-      state.lang==="ms-MY"?"ms-MY":"en-GB",
-      {hour:"numeric",minute:"2-digit"}
-    );
-
-    return state.lang==="ms-MY"
-      ?`Sekarang pukul ${now}.`
-      :`The time is ${now}.`;
-  }
-
-  return state.lang==="ms-MY"
-    ?`Baik. Saya terima arahan: ${text}`
-    :`Understood. I received your command: ${text}`;
 }
 
 function handle(text){
-  if(!text)return;
 
-  state.lang=detectLang(text);
-  saveMemory(text);
+ text=text.trim();
 
-  log(`YOU [${state.lang}]: ${text}`);
+ if(!text)return;
 
-  const reply=responseFor(text);
+ state.turns.push({
+  role:'user',
+  text,
+  time:Date.now()
+ });
 
-  log(`JARVIS: ${reply}`);
-  speak(reply);
+ state.turns=state.turns.slice(-40);
+
+ persist();
+
+ log('USER: '+text);
+
+ brain(text);
+
 }
 
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let recognition=null;
+function renderTasks(){
 
-if(SR){
-  recognition=new SR();
-  recognition.lang="ms-MY";
-  recognition.continuous=false;
-  recognition.interimResults=false;
-  recognition.maxAlternatives=1;
+ $('tasks').textContent=
+  state.tasks.length
+   ?state.tasks.map((x,i)=>`${i+1}. ${x}`).join('\n')
+   :'No tasks stored.';
 
-  recognition.onstart=()=>{
-    state.listening=true;
-    setStatus("LISTENING");
-    log("Microphone listening...");
-  };
-
-  recognition.onresult=e=>{
-    const text=e.results[e.results.length-1][0].transcript.trim();
-
-    if(text){
-      handle(text);
-    }
-  };
-
-  recognition.onerror=e=>{
-    state.listening=false;
-    setStatus("MIC ERROR");
-
-    log(`Microphone error: ${e.error}`);
-
-    if(e.error==="not-allowed"){
-      log("Microphone permission was denied.");
-    }
-  };
-
-  recognition.onnomatch=()=>{
-    log("No speech match detected.");
-    setStatus(state.workLoop?"WORK LISTENING":"READY");
-  };
-
-  recognition.onend=()=>{
-    state.listening=false;
-
-    if(state.workLoop){
-      setStatus("WORK LISTENING");
-
-      setTimeout(()=>{
-        if(state.workLoop && !state.listening){
-          try{
-            recognition.start();
-          }catch(e){}
-        }
-      },350);
-    }else{
-      setStatus("READY");
-    }
-  };
-}else{
-  setStatus("TEXT / TTS ONLY");
-  log("SpeechRecognition is not available in this browser.");
 }
 
-function startListening(){
-  if(!recognition){
-    setStatus("TEXT / TTS ONLY");
-    return;
+function addTask(){
+
+ let x=prompt('Task');
+
+ if(x){
+
+  state.tasks.push(x);
+
+  renderTasks();
+
+  persist();
+
+  say('Task stored.');
+
+ }
+
+}
+
+function showSettings(){
+
+ $('settings').classList.toggle('open');
+
+ populateVoices();
+
+ $('log').textContent=
+  state.logs.join('\n');
+
+}
+
+function populateVoices(){
+
+ let vs=speechSynthesis.getVoices();
+
+ $('voiceSelect').innerHTML=
+  vs.map(v=>
+   `<option value="${v.name.replace(/"/g,'&quot;')}">
+    ${v.name} — ${v.lang}
+   </option>`
+  ).join('');
+
+ let v=chooseVoice();
+
+ if(v)
+  $('voiceSelect').value=v.name;
+
+ $('voiceState').textContent=
+  v
+   ?'MALE • '+v.lang
+   :'MALE VOICE UNAVAILABLE';
+
+}
+
+function saveSettings(){
+
+ let v=$('voiceSelect').value;
+
+ if(v)
+  localStorage.setItem('jarvisVoice',v);
+
+ localStorage.setItem(
+  'jarvisEndpoint',
+  $('endpoint').value
+ );
+
+ say(
+  'Voice preference saved. Male British English is prioritised when the device provides a suitable voice.'
+ );
+
+}
+
+function setupSpeech(){
+
+ const SR=
+  window.SpeechRecognition||
+  window.webkitSpeechRecognition;
+
+ if(!SR){
+
+  $('status').textContent='TEXT / TTS ONLY';
+
+  return;
+
+ }
+
+ recognition=new SR();
+
+ recognition.lang='ms-MY';
+ recognition.continuous=false;
+ recognition.interimResults=false;
+
+ recognition.onstart=()=>{
+
+  listening=true;
+
+  $('mic').classList.add('on');
+
+  $('status').textContent='LISTENING';
+
+ };
+
+ recognition.onresult=e=>{
+
+  let text=
+   e.results[0][0].transcript;
+
+  let lang=detectLang(text);
+
+  recognition.lang=lang;
+
+  handle(text);
+
+ };
+
+ recognition.onerror=()=>{
+
+  listening=false;
+
+  $('mic').classList.remove('on');
+
+  $('status').textContent='CORE ONLINE';
+
+ };
+
+ recognition.onend=()=>{
+
+  listening=false;
+
+  $('mic').classList.remove('on');
+
+  $('status').textContent='CORE ONLINE';
+
+  if(
+   state.mode==='Work' &&
+   document.visibilityState==='visible' &&
+   state.workLoop
+  ){
+
+   setTimeout(startListen,350);
+
   }
+
+ };
+
+}
+
+function startListen(){
+
+ if(
+  state.mode==='Private'||
+  !recognition||
+  listening
+ )return;
+
+ try{
+
+  recognition.start();
+
+ }catch(e){}
+
+}
+
+function stopListen(){
+
+ state.workLoop=false;
+
+ if(
+  recognition&&
+  listening
+ ){
 
   try{
-    recognition.lang=state.lang;
-    recognition.start();
+   recognition.stop();
   }catch(e){}
+
+ }
+
+ listening=false;
+
+ $('mic').classList.remove('on');
+
+ $('status').textContent='MIC OFF';
+
+ persist();
+
 }
 
-function stopListening(){
-  if(!recognition)return;
+function toggleListen(){
 
-  try{
-    recognition.stop();
-  }catch(e){}
+ if(listening){
+
+  stopListen();
+
+ }else{
+
+  state.workLoop=
+   state.mode==='Work';
+
+  persist();
+
+  startListen();
+
+ }
+
 }
 
-function setWork(){
-  state.mode="Work";
-  state.workLoop=true;
+$('cmd').addEventListener(
+ 'keydown',
+ e=>{
 
-  document.querySelectorAll(".mode").forEach(b=>{
-    b.classList.toggle("active",b.dataset.mode==="Work");
-  });
+  if(e.key==='Enter'){
 
-  setStatus("WORK LISTENING");
-  log("WORK MODE activated.");
+   handle(e.target.value);
 
-  if(recognition && !state.listening){
-    setTimeout(startListening,250);
+   e.target.value='';
+
   }
-}
 
-function setPrivate(){
-  state.mode="Private";
-  state.workLoop=false;
+ }
+);
 
-  stopListening();
-  speechSynthesis.cancel();
-  setTalking(false);
+speechSynthesis.onvoiceschanged=
+ populateVoices;
 
-  document.querySelectorAll(".mode").forEach(b=>{
-    b.classList.toggle("active",b.dataset.mode==="Private");
-  });
+renderModes();
 
-  setStatus("PRIVATE");
-  log("PRIVATE MODE activated. Microphone OFF.");
-}
+renderTasks();
 
-function setAmbient(){
-  state.mode="Ambient";
-  state.workLoop=false;
+setupSpeech();
 
-  document.querySelectorAll(".mode").forEach(b=>{
-    b.classList.toggle("active",b.dataset.mode==="Ambient");
-  });
+populateVoices();
 
-  setStatus("AMBIENT");
-  log("AMBIENT MODE activated.");
-}
+$('endpoint').value=
+ localStorage.getItem('jarvisEndpoint')||'';
 
-document.querySelectorAll(".mode").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    const mode=btn.dataset.mode;
-
-    if(mode==="Work"){
-      setWork();
-      return;
-    }
-
-    if(mode==="Private"){
-      setPrivate();
-      return;
-    }
-
-    if(mode==="Ambient"){
-      setAmbient();
-      return;
-    }
-
-    state.mode=mode;
-    state.workLoop=false;
-    stopListening();
-
-    document.querySelectorAll(".mode").forEach(b=>{
-      b.classList.toggle("active",b===btn);
-    });
-
-    setStatus(mode.toUpperCase());
-    log(`${mode} mode selected.`);
-  });
-});
-
-$("mic").addEventListener("click",()=>{
-  if(state.listening){
-    stopListening();
-  }else{
-    startListening();
-  }
-});
-
-$("work").addEventListener("click",()=>{
-  if(state.mode==="Work"&&state.workLoop){
-    state.workLoop=false;
-    stopListening();
-    setStatus("READY");
-    log("WORK MODE stopped.");
-  }else{
-    setWork();
-  }
-});
-
-$("private").addEventListener("click",setPrivate);
-$("ambient").addEventListener("click",setAmbient);
-
-$("send").addEventListener("click",()=>{
-  handle($("cmd").value.trim());
-  $("cmd").value="";
-});
-
-$("cmd").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){
-    e.preventDefault();
-    $("send").click();
-  }
-});
-
-speechSynthesis.onvoiceschanged=()=>{
-  log("Voice list refreshed.");
-};
-
-$("memory").textContent=
-  `${state.memory.length} local context item${state.memory.length===1?"":"s"} stored`;
-
-log("JARVIS AZWAN v4.1 initialised.");
-log("Language: Bahasa Malaysia / English adaptive mode.");
-log("Voice: browser/device voice engine.");
-log("Brain: local rule-based gateway.");
-log("Consequential actions remain approval-gated.");
-</script>
-</body></html>
+log(
+ 'v4.2 initialised — original HUD preserved; core enlarged; male voice fallback disabled.'
+);
 
 </script>
-</body></html>
+
+</body>
+</html>
