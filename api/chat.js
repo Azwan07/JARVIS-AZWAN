@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     }
 
     const apiKey = process.env.POE_API_KEY;
-    const model = process.env.POE_MODEL || "Claude-Sonnet-4.6";
+    const model = process.env.POE_MODEL || "assistant";
 
     if (!apiKey) {
       return res.status(500).json({
