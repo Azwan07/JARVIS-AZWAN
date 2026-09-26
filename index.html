@@ -1,1370 +1,530 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="JARVIS AZWAN">
-<link rel="manifest" href="manifest.webmanifest">
 <title>JARVIS AZWAN</title>
 
 <style>
-:root{
- --bg:#020202;
- --p:#0d0906d9;
- --o:#ff8a00;
- --a:#ffc15a;
- --c:#63d8ff;
- --w:#eee8e1;
- --m:#8e8379;
- --l:#ff8a0070
-}
 *{box-sizing:border-box}
 html,body{
- margin:0;
- background:#020202;
- color:var(--w);
- font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif
-}
-body{
- min-height:100vh;
- background:radial-gradient(circle at 50% 32%,#321600 0,#090604 30%,#020202 70%);
- overflow-x:hidden
-}
-.app{
- max-width:920px;
- margin:auto;
- padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 22px)
-}
-.top{display:flex;justify-content:space-between;align-items:center}
-.brand{display:flex;align-items:center;gap:9px}
-.mark{
- width:40px;height:40px;border:1px solid var(--o);
- border-radius:50%;display:grid;place-items:center;
- box-shadow:0 0 24px #ff8a0055
-}
-.mark i{
- width:13px;height:13px;border-radius:50%;
- background:var(--o);box-shadow:0 0 20px var(--o)
-}
-.brand b{letter-spacing:4px;color:var(--o);font-size:20px}
-.brand small{display:block;letter-spacing:3px;color:var(--a)}
-.pill{
- font-size:10px;border:1px solid var(--l);
- border-radius:20px;padding:7px 10px;color:var(--a)
-}
-.panel{
- margin-top:10px;
- background:linear-gradient(145deg,#1b0e06c7,#050505e8);
- border:1px solid var(--l);
- clip-path:polygon(
- 0 9px,9px 0,calc(100% - 9px) 0,100% 9px,
- 100% calc(100% - 9px),calc(100% - 9px) 100%,
- 9px 100%,0 calc(100% - 9px)
- );
- padding:13px;
- box-shadow:0 0 30px #ff7b0010
-}
-.greet h1{font-size:22px;margin:0;color:var(--o)}
-.greet p{margin:4px 0 0;color:#c8bfb7;font-size:12px}
-
-.hero{
- height:370px;
- display:grid;
- place-items:center;
- position:relative;
+ margin:0;width:100%;height:100%;
+ background:#020304;color:#e9faff;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
  overflow:hidden
 }
-
+body{
+ background:
+ radial-gradient(circle at 50% 42%,rgba(255,120,0,.08),transparent 28%),
+ radial-gradient(circle at 50% 50%,#101010 0%,#030405 60%,#000 100%);
+}
+.app{height:100%;display:flex;flex-direction:column}
+header{
+ height:64px;padding:10px 14px;
+ display:flex;align-items:center;justify-content:space-between;
+ border-bottom:1px solid rgba(255,120,0,.5);
+ background:rgba(0,0,0,.7);
+}
+.brand{color:#ff8a00;font-weight:800;letter-spacing:2px}
+.sub{font-size:9px;color:#6defff;letter-spacing:2px}
+.status{font-size:10px;color:#6defff}
+main{
+ flex:1;position:relative;display:flex;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
 .core{
- width:325px;
- height:325px;
- border-radius:50%;
  position:relative;
- display:grid;
- place-items:center;
- filter:drop-shadow(0 0 28px #ff850088);
- transition:.25s
+ width:min(72vw,390px);
+ height:min(72vw,390px);
 }
-
-.core img{
- width:100%;
- height:100%;
- object-fit:cover;
- border-radius:50%;
- mix-blend-mode:screen;
- opacity:.88
+.core canvas{
+ position:absolute;inset:0;width:100%;height:100%;
 }
-
-.core:before,.core:after{
- content:"";
- position:absolute;
- border-radius:50%;
- inset:2px;
- border:1px solid #ffb13b88;
- box-shadow:inset 0 0 35px #ff8a0044,0 0 30px #ff8a0033
-}
-
-.core:after{
- inset:-14px;
- border:1px dashed #ff8a0070;
- animation:spin 13s linear infinite
-}
-
-.core .r2{
- position:absolute;
- inset:27px;
- border:1px solid #ffc15a55;
- border-radius:50%;
- animation:spin 9s linear infinite reverse
-}
-
-.core .label{
+.core-label{
+ position:absolute;inset:0;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ pointer-events:none;
  text-align:center;
+}
+.core-label strong{
+ color:#ff9a18;font-size:28px;
+ letter-spacing:7px;
+ text-shadow:0 0 15px #ff6a00,0 0 40px #ff6a00;
+}
+.core-label span{
+ color:#6defff;font-size:10px;
+ letter-spacing:4px;margin-top:5px;
+}
+.panel{
  position:absolute;
- text-shadow:0 0 10px #000;
- font-weight:700;
- letter-spacing:4px;
- color:#ffd27b
+ border:1px solid rgba(255,130,0,.45);
+ background:rgba(5,8,10,.78);
+ box-shadow:0 0 20px rgba(255,100,0,.08);
+ backdrop-filter:blur(8px);
+ padding:10px;
 }
-
-.core .label small{
- display:block;
- font-size:8px;
- letter-spacing:3px;
- color:#fff1cf;
- margin-top:3px
+.left{left:10px;top:15px;width:190px}
+.right{right:10px;top:15px;width:190px}
+.panel h3{
+ margin:0 0 8px;color:#ff8a00;
+ font-size:10px;letter-spacing:2px
 }
-
-.core.talking{
- animation:talk .72s ease-in-out infinite
+.item{
+ font-size:10px;color:#b9d9df;
+ padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)
 }
-
-.core.talking:after{
- box-shadow:0 0 45px #ff8a00aa
+.item b{color:#6defff}
+.bottom{
+ position:absolute;bottom:10px;left:50%;
+ transform:translateX(-50%);
+ width:min(92%,600px);
 }
-
-@keyframes spin{
- to{transform:rotate(360deg)}
+.response{
+ min-height:48px;
+ color:#dffaff;
+ font-size:13px;
+ line-height:1.45;
 }
-
-@keyframes talk{
- 50%{transform:scale(1.045)}
+.controls{
+ display:flex;gap:8px;margin-top:8px
 }
-
-.mini{
- position:absolute;
- top:12px;
- font-size:9px;
- letter-spacing:2px;
- color:var(--c);
- opacity:.85
-}
-
-.modes{
- display:flex;
- gap:7px;
- overflow:auto
-}
-
-.mode{
- white-space:nowrap;
- border:1px solid #ff8a0060;
- background:#061018;
- color:var(--c);
- border-radius:18px;
- padding:8px 10px;
- font-size:10px
-}
-
-.mode.active{
- border-color:var(--o);
- box-shadow:0 0 15px #ff8a0020;
- background:#211006
-}
-
-.grid{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:10px
-}
-
-.grid .panel{margin-top:10px}
-
-.h{
- font-size:10px;
- letter-spacing:1.5px;
- color:var(--a);
- margin-bottom:8px
-}
-
-.metric{
- display:flex;
- justify-content:space-between;
- font-size:11px;
- padding:5px 0;
- border-bottom:1px solid #ffffff0d
-}
-
-.metric span:last-child{color:var(--a)}
-
-.reply{
- font-size:12px;
- line-height:1.5;
- white-space:pre-wrap;
- min-height:50px
-}
-
-.quick{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:7px
-}
-
-.quick button,.action{
- background:#0b0907;
- border:1px solid #ff8a0055;
- color:var(--a);
- border-radius:9px;
- padding:9px 5px;
- font-size:10px
-}
-
-.devices{display:flex;gap:7px}
-
-.device{
- flex:1;
- border:1px solid #ff8a0045;
- padding:9px;
- border-radius:9px;
- font-size:10px
-}
-
-.device b{
- color:var(--c);
- display:block;
- margin-bottom:3px
-}
-
-.command{
- display:flex;
- gap:7px;
- position:sticky;
- bottom:8px;
- margin-top:10px
-}
-
-.command input{
- min-width:0;
- flex:1;
- border:1px solid #ff8a0070;
- background:#080706;
- color:#fff;
- border-radius:25px;
- padding:13px;
+input{
+ flex:1;background:#070a0c;
+ border:1px solid rgba(255,130,0,.5);
+ color:white;padding:12px;border-radius:4px;
  outline:none
 }
-
-.mic{
- width:48px;
- border:1px solid var(--o);
- border-radius:50%;
- background:#130b04;
- color:var(--o);
- font-size:18px
+button{
+ border:1px solid #ff8a00;
+ background:#100b05;
+ color:#ff9a18;
+ padding:11px 15px;
+ border-radius:4px;
+ font-weight:700;
 }
-
+button:active{transform:scale(.97)}
 .mic.on{
- box-shadow:0 0 20px #ff8a0066
+ background:#ff6a00;color:#000;
+ box-shadow:0 0 18px #ff6a00
 }
-
-.footer{
- text-align:center;
- color:#655d56;
- font-size:9px;
- margin:12px 0
-}
-
-.settings{display:none}
-.settings.open{display:block}
-
-.field{
- display:flex;
- gap:7px;
- margin:7px 0
-}
-
-.field input,.field select{
- flex:1;
- background:#080706;
- color:#fff;
- border:1px solid #ff8a0050;
- border-radius:8px;
- padding:9px
-}
-
-.log{
- max-height:130px;
- overflow:auto;
- font-size:10px;
- color:#bdb3aa
-}
-
-.ok{color:#83e7b0}
-.warn{color:#ffc15a}
-
-@media(min-width:700px){
- .hero{height:460px}
- .core{width:400px;height:400px}
- .grid{grid-template-columns:repeat(3,1fr)}
+@media(max-width:700px){
+ .left,.right{display:none}
+ .core{width:82vw;height:82vw}
+ .bottom{bottom:8px}
 }
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<main class="app">
-
-<header class="top">
- <div class="brand">
-  <div class="mark"><i></i></div>
-  <div>
-   <b>JARVIS</b>
-   <small>AZWAN</small>
-  </div>
+<header>
+ <div>
+   <div class="brand">JARVIS AZWAN</div>
+   <div class="sub">PERSONAL AI ASSISTANT</div>
  </div>
- <div class="pill" id="status">CORE ONLINE</div>
+ <div class="status" id="status">READY</div>
 </header>
 
-<section class="panel greet">
- <h1>GOOD EVENING, AZWAN</h1>
- <p>Personal AI command centre • iPhone Gateway • Free-first / provider-neutral</p>
-</section>
+<main>
 
-<section class="panel hero">
- <div class="mini" id="modeBanner">MODE: WORK • VOICE READY</div>
+ <section class="panel left">
+   <h3>TODAY'S TASKS</h3>
+   <div class="item"><b>01</b> Building maintenance</div>
+   <div class="item"><b>02</b> Vendor follow-up</div>
+   <div class="item"><b>03</b> Payment tracking</div>
+   <div class="item"><b>04</b> Report preparation</div>
+ </section>
 
- <div class="core" id="core">
-  <img src="assets/jarvis-core-reference.png" alt="JARVIS Core">
-  <div class="r2"></div>
-  <div class="label">
-   JARVIS
-   <small>CORE</small>
-  </div>
- </div>
-</section>
-
-<section class="panel">
- <div class="h">COMMAND MODES</div>
- <div class="modes" id="modes"></div>
-</section>
-
-<div class="grid">
-
-<section class="panel">
- <div class="h">SYSTEM STATUS</div>
-
- <div class="metric">
-  <span>iPHONE GATEWAY</span>
-  <span class="ok">READY</span>
+ <div class="core">
+   <canvas id="coreCanvas"></canvas>
+   <div class="core-label">
+     <strong>JARVIS</strong>
+     <span>AZWAN CORE</span>
+   </div>
  </div>
 
- <div class="metric">
-  <span>LOCAL MEMORY</span>
-  <span id="mem">ACTIVE</span>
- </div>
+ <section class="panel right">
+   <h3>CORE STATUS</h3>
+   <div class="item">BRAIN <b>READY</b></div>
+   <div class="item">MEMORY <b>ACTIVE</b></div>
+   <div class="item">VOICE <b id="voiceState">READY</b></div>
+   <div class="item">SECURITY <b>LOCKED</b></div>
+ </section>
 
- <div class="metric">
-  <span>AI ROUTER</span>
-  <span id="brain">LOCAL</span>
- </div>
+ <section class="panel bottom">
+   <div class="response" id="response">
+     Good morning, Azwan. JARVIS is ready.
+   </div>
 
- <div class="metric">
-  <span>VOICE</span>
-  <span id="voiceState">MALE • EN-GB</span>
- </div>
-</section>
-
-<section class="panel">
- <div class="h">WORK / TASKS</div>
- <div id="tasks" class="reply">No tasks stored.</div>
- <button class="action" onclick="addTask()">+ ADD TASK</button>
-</section>
-
-<section class="panel">
- <div class="h">QUICK ACCESS</div>
-
- <div class="quick">
-  <button onclick="say('Opening browser.')">BROWSER</button>
-  <button onclick="say('Opening notes.')">NOTES</button>
-  <button onclick="say('Work mode ready.')">WORK</button>
-  <button onclick="say('Investment hub is approval gated.')">INVEST</button>
-  <button onclick="say('Cafe maintenance mode ready.')">CAFE</button>
-  <button onclick="showSettings()">SETTINGS</button>
- </div>
-</section>
-
-<section class="panel">
- <div class="h">DEVICE LAYER</div>
-
- <div class="devices">
-  <div class="device">
-   <b>APPLE WATCH 9</b>
-   Quick control target
-  </div>
-
-  <div class="device">
-   <b>RAY-BAN META 2</b>
-   Vision / voice target
-  </div>
- </div>
-</section>
-
-<section class="panel">
- <div class="h">JARVIS RESPONSE</div>
- <div id="reply" class="reply">
-  Ready, Azwan. Say a command.
- </div>
-</section>
-
-<section class="panel">
- <div class="h">SECURITY / APPROVAL</div>
-
- <div class="reply">
-Consequential external actions require explicit owner approval.
-Financial BUY/SELL/DEPOSIT/WITHDRAW/TRANSFER remain approval-gated.
-No keys or seed phrases stored.
- </div>
-</section>
-
-</div>
-
-<section class="panel settings" id="settings">
-
- <div class="h">VOICE / BRAIN SETTINGS</div>
-
- <div class="field">
-  <select id="voiceSelect"></select>
-  <button class="action" onclick="saveSettings()">SAVE</button>
- </div>
-
- <div class="field">
-  <input
-   id="endpoint"
-   placeholder="Optional OpenAI-compatible endpoint (leave blank for local brain)"
-  >
- </div>
-
- <div class="log" id="log"></div>
-
-</section>
-
-<div class="command">
-
- <input
-  id="cmd"
-  placeholder="Say or type: Jarvis, what should I do next?"
- >
-
- <button
-  class="mic"
-  id="mic"
-  onclick="toggleListen()"
- >
-  🎙
- </button>
-
-</div>
-
-<div class="footer">
- JARVIS AZWAN v4.2 • Free-first • No embedded secrets • Foreground voice on iPhone
-</div>
+   <div class="controls">
+     <input id="command" placeholder="Talk to JARVIS..." autocomplete="off">
+     <button id="send">SEND</button>
+     <button id="mic" class="mic">🎙</button>
+   </div>
+ </section>
 
 </main>
+</div>
 
 <script>
+/* =========================================================
+   JARVIS AZWAN CORE
+   ========================================================= */
 
-const KEY='jarvis_azwan_v4';
-
-let state=JSON.parse(localStorage.getItem(KEY)||'{}');
-
-state.mode=state.mode||'Work';
-state.lang=state.lang||'ms-MY';
-state.tasks=state.tasks||[];
-state.turns=state.turns||[];
-state.logs=state.logs||[];
-
-let recognition=null;
-let listening=false;
+const canvas=document.getElementById("coreCanvas");
+const ctx=canvas.getContext("2d");
+let W,H,DPR;
 let speaking=false;
+let listening=false;
 
-const modes=[
-'Normal',
-'Rapid Response',
-'Ambient',
-'Private',
-'Work',
-'Urgent Work',
-'Autonomous Work',
-'Task',
-'Document',
-'Cafe',
-'Vendor',
-'Inventory',
-'Payment-Ledger',
-'Licence-Renewal',
-'Report-Drafting',
-'English Coach',
-'Mandarin Negotiation',
-'Investment',
-'Stock Analysis',
-'Market Watch',
-'Trading Alert',
-'Risk Analysis',
-'Trade Preparation',
-'Trade Approval',
-'Vision',
-'Ray-Ban Meta',
-'iPhone',
-'Apple Watch',
-'Browser',
-'Camera Analysis',
-'Coding',
-'Testing',
-'Security',
-'Audit',
-'Find It',
-'Meeting',
-'Expense-Cost',
-'Always-On',
-'Interior Design'
-];
+function resize(){
+ DPR=window.devicePixelRatio||1;
+ const r=canvas.getBoundingClientRect();
+ W=r.width;H=r.height;
+ canvas.width=W*DPR;
+ canvas.height=H*DPR;
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
 
-const $=id=>document.getElementById(id);
-
-function persist(){
-
- localStorage.setItem(KEY,JSON.stringify(state));
-
- $('mem').textContent=
-   'ACTIVE • '+state.turns.length+' TURNS';
-
+const particles=[];
+for(let i=0;i<260;i++){
+ particles.push({
+   a:Math.random()*Math.PI*2,
+   r:.12+Math.random()*.42,
+   z:Math.random(),
+   s:.002+Math.random()*.009,
+   size:.4+Math.random()*1.8
+ });
 }
 
-function renderModes(){
+function drawCore(t){
+ ctx.clearRect(0,0,W,H);
 
- $('modes').innerHTML=modes.map(m=>
-  `<button class="mode ${m===state.mode?'active':''}"
-   onclick="setMode('${m.replace(/'/g,"\\'")}')">
-   ${m}
-  </button>`
- ).join('');
+ const cx=W/2,cy=H/2;
+ const R=Math.min(W,H)*.34;
 
-}
+ ctx.save();
+ ctx.translate(cx,cy);
 
-function setMode(m){
-
- state.mode=m;
-
- if(m==='Private'){
-
-  stopListen();
-
-  $('modeBanner').textContent=
-   'MODE: PRIVATE • MICROPHONE OFF';
-
- }else{
-
-  $('modeBanner').textContent=
-   'MODE: '+m.toUpperCase()+' • VOICE READY';
-
+ /* outer holographic rings */
+ for(let i=0;i<7;i++){
+   const rr=R*(1.05+i*.11);
+   ctx.beginPath();
+   ctx.arc(0,0,rr,t*.0002*(i%2?1:-1)+i*.7,
+                  t*.0002*(i%2?1:-1)+i*.7+Math.PI*1.35);
+   ctx.strokeStyle=`rgba(255,${120+i*12},20,${.12-i*.011})`;
+   ctx.lineWidth=i%2?1:.7;
+   ctx.stroke();
  }
 
- renderModes();
- persist();
+ /* energy field */
+ const g=ctx.createRadialGradient(0,0,0,0,0,R*1.2);
+ g.addColorStop(0,"rgba(255,230,150,.9)");
+ g.addColorStop(.08,"rgba(255,150,20,.75)");
+ g.addColorStop(.28,"rgba(255,80,0,.25)");
+ g.addColorStop(.65,"rgba(255,70,0,.06)");
+ g.addColorStop(1,"rgba(255,60,0,0)");
+ ctx.fillStyle=g;
+ ctx.beginPath();
+ ctx.arc(0,0,R*1.2,0,Math.PI*2);
+ ctx.fill();
 
- say(
-  m==='Work'
-   ?'Work mode active. I am ready for your instructions.'
-   :m==='Private'
-    ?'Private mode. Microphone is off.'
-    :m+' mode active.'
- );
+ /* rotating orbital energy */
+ for(let j=0;j<9;j++){
+   ctx.save();
+   ctx.rotate(t*.0004*(j%2?1:-1)+j*.7);
+   ctx.beginPath();
+   ctx.ellipse(
+     0,0,
+     R*(.65+j*.045),
+     R*(.16+j*.012),
+     0,0,Math.PI*2
+   );
+   ctx.strokeStyle=`rgba(255,${110+j*15},25,${.25-j*.018})`;
+   ctx.stroke();
+   ctx.restore();
+ }
 
+ /* particles */
+ for(const p of particles){
+   p.a+=p.s;
+   const rr=R*(.35+p.r);
+   const x=Math.cos(p.a)*rr;
+   const y=Math.sin(p.a)*rr*.62;
+
+   ctx.fillStyle=`rgba(255,${100+Math.random()*100},30,${.3+p.z*.7})`;
+   ctx.beginPath();
+   ctx.arc(x,y,p.size,0,Math.PI*2);
+   ctx.fill();
+
+   if(p.z>.7){
+     ctx.strokeStyle="rgba(255,130,30,.18)";
+     ctx.beginPath();
+     ctx.moveTo(x,y);
+     ctx.lineTo(x*.72,y*.72);
+     ctx.stroke();
+   }
+ }
+
+ /* central energy nucleus */
+ const pulse=1+
+   Math.sin(t*.004)*(speaking?.10:.035)+
+   Math.sin(t*.009)*.018;
+
+ const coreR=R*.27*pulse;
+
+ const cg=ctx.createRadialGradient(0,0,0,0,0,coreR*1.8);
+ cg.addColorStop(0,"rgba(255,255,220,1)");
+ cg.addColorStop(.08,"rgba(255,190,60,.95)");
+ cg.addColorStop(.35,"rgba(255,100,0,.55)");
+ cg.addColorStop(1,"rgba(255,50,0,0)");
+
+ ctx.fillStyle=cg;
+ ctx.beginPath();
+ ctx.arc(0,0,coreR*1.8,0,Math.PI*2);
+ ctx.fill();
+
+ for(let k=0;k<35;k++){
+   const a=t*.001*(k%2?1:-1)+k;
+   const len=coreR*(.5+Math.random()*.8);
+   ctx.strokeStyle="rgba(255,160,40,.45)";
+   ctx.beginPath();
+   ctx.moveTo(Math.cos(a)*coreR*.3,Math.sin(a)*coreR*.3);
+   ctx.lineTo(Math.cos(a)*len,Math.sin(a)*len);
+   ctx.stroke();
+ }
+
+ ctx.restore();
+ requestAnimationFrame(drawCore);
+}
+requestAnimationFrame(drawCore);
+
+
+/* =========================================================
+   VOICE
+   ========================================================= */
+
+const response=document.getElementById("response");
+const status=document.getElementById("status");
+const voiceState=document.getElementById("voiceState");
+const mic=document.getElementById("mic");
+const command=document.getElementById("command");
+
+let recognition=null;
+
+function setStatus(x){
+ status.textContent=x;
 }
 
-function log(x){
+async function startMic(){
 
- state.logs.unshift(
-  new Date().toLocaleTimeString()+' — '+x
- );
+ if(listening){
+   stopMic();
+   return;
+ }
 
- state.logs=state.logs.slice(0,40);
+ try{
+   if(!navigator.mediaDevices?.getUserMedia){
+     throw new Error("Microphone API unavailable");
+   }
 
- $('log').textContent=state.logs.join('\n');
+   await navigator.mediaDevices.getUserMedia({
+     audio:{
+       echoCancellation:true,
+       noiseSuppression:true,
+       autoGainControl:true
+     }
+   });
 
- persist();
+   const SR=window.SpeechRecognition||
+            window.webkitSpeechRecognition;
 
+   if(!SR){
+     throw new Error("Speech recognition is not supported by this browser");
+   }
+
+   recognition=new SR();
+
+   recognition.lang="ms-MY";
+   recognition.continuous=false;
+   recognition.interimResults=false;
+   recognition.maxAlternatives=1;
+
+   recognition.onstart=()=>{
+     listening=true;
+     mic.classList.add("on");
+     voiceState.textContent="LISTENING";
+     setStatus("LISTENING");
+     response.textContent="I'm listening, Azwan...";
+   };
+
+   recognition.onresult=(event)=>{
+     const text=event.results[0][0].transcript;
+     command.value=text;
+     stopMic();
+     ask(text);
+   };
+
+   recognition.onerror=(event)=>{
+     stopMic();
+     response.textContent=
+       "Microphone error: "+event.error;
+   };
+
+   recognition.onend=()=>{
+     listening=false;
+     mic.classList.remove("on");
+     voiceState.textContent="READY";
+     setStatus("READY");
+   };
+
+   recognition.start();
+
+ }catch(err){
+   stopMic();
+   response.textContent=
+     "Microphone unavailable. Allow microphone access for this site in Safari Settings.";
+   console.error(err);
+ }
 }
 
-let selectedVoice=null;
-
-function maleVoiceCandidates(){
-
- let vs=speechSynthesis.getVoices();
-
- return vs.filter(v=>
-  /Daniel|Oliver|Arthur|Alex|Fred|Tom|George|James|Google UK English Male|Microsoft.*(David|George|Mark|Ryan|Male).*English/i
-  .test(v.name)
-  ||
-  /\bmale\b/i.test(v.name)
- );
-
+function stopMic(){
+ try{recognition?.stop()}catch(e){}
+ listening=false;
+ mic.classList.remove("on");
+ voiceState.textContent="READY";
+ setStatus("READY");
 }
 
-function chooseVoice(){
+mic.onclick=startMic;
 
- let vs=speechSynthesis.getVoices();
 
- let saved=localStorage.getItem('jarvisVoice');
+/* =========================================================
+   SPEECH
+   ========================================================= */
 
- let savedVoice=
-  vs.find(v=>v.name===saved);
+function speak(text){
 
- if(savedVoice)return savedVoice;
-
- let candidates=maleVoiceCandidates();
-
- let v=
-  candidates.find(v=>/^en-GB/i.test(v.lang))
-  ||
-  candidates.find(v=>/^en/i.test(v.lang))
-  ||
-  candidates[0]
-  ||
-  null;
-
- selectedVoice=v;
-
- return v;
-
-}
-
-function setTalking(v){
-
- speaking=v;
-
- $('core').classList.toggle('talking',v);
-
- $('voiceState').textContent=
-  v
-   ?(
-      selectedVoice
-       ?`SPEAKING • ${selectedVoice.lang}`
-       :'SPEAKING • VOICE NOT LOCKED'
-     )
-   :(
-      selectedVoice
-       ?`MALE • ${selectedVoice.lang}`
-       :'MALE VOICE UNAVAILABLE'
-     );
-
-}
-
-function say(text){
-
- $('reply').textContent=text;
-
- if(!('speechSynthesis' in window))return;
+ if(!("speechSynthesis" in window)) return;
 
  speechSynthesis.cancel();
 
- let v=chooseVoice();
+ const u=new SpeechSynthesisUtterance(text);
+
+ u.lang="en-GB";
+ u.rate=.96;
+ u.pitch=.82;
+ u.volume=1;
+
+ const voices=speechSynthesis.getVoices();
+
+ const preferred=[
+   "Daniel",
+   "Oliver",
+   "Arthur",
+   "Google UK English Male"
+ ];
+
+ let v=null;
+
+ for(const name of preferred){
+   v=voices.find(x=>x.name.includes(name));
+   if(v)break;
+ }
 
  if(!v){
-
-  $('voiceState').textContent=
-   'MALE VOICE UNAVAILABLE';
-
-  log(
-   'No verified male device voice is available; refusing female fallback.'
-  );
-
-  return;
-
+   v=voices.find(x=>x.lang==="en-GB" && /male/i.test(x.name));
  }
 
- selectedVoice=v;
+ if(v)u.voice=v;
 
- let u=
-  new SpeechSynthesisUtterance(text);
+ u.onstart=()=>{
+   speaking=true;
+   setStatus("SPEAKING");
+ };
 
- u.voice=v;
- u.lang=v.lang||'en-GB';
- u.rate=.92;
- u.pitch=.88;
-
- u.onstart=()=>setTalking(true);
-
- u.onend=()=>setTalking(false);
-
- u.onerror=()=>setTalking(false);
+ u.onend=()=>{
+   speaking=false;
+   setStatus("READY");
+ };
 
  speechSynthesis.speak(u);
-
- state.turns.push({
-  role:'assistant',
-  text,
-  time:Date.now()
- });
-
- state.turns=state.turns.slice(-40);
-
- log('JARVIS: '+text);
-
 }
 
-function detectLang(text){
+speechSynthesis?.addEventListener?.(
+ "voiceschanged",
+ ()=>speechSynthesis.getVoices()
+);
 
- let t=text.toLowerCase();
 
- let ms=[
-  'aku','saya','kau','awak','boleh','nak','mahu',
-  'tolong','buat','sekarang','dah','tak','tidak',
-  'apa','kenapa','macam','mana','ini','itu','untuk',
-  'dengan','kerja','laporan','harga','semak','cari',
-  'buka','ingat','jangan','kita','berapa','hai'
- ];
+/* =========================================================
+   JARVIS BRAIN CONNECTION
+   ========================================================= */
 
- let en=[
-  'the','this','that','what','why','how','can',
-  'please','make','create','check','search','open',
-  'close','remember','work','report','price','find',
-  'show','tell','where','when','which','need','want'
- ];
+async function ask(text){
 
- let m=ms.filter(w=>
-  new RegExp('\\b'+w+'\\b','i').test(t)
- ).length;
-
- let e=en.filter(w=>
-  new RegExp('\\b'+w+'\\b','i').test(t)
- ).length;
-
- return m>=e?'ms-MY':'en-GB';
-
-}
-
-function brain(text){
-
- let t=text.toLowerCase();
-
- let ms=detectLang(text)==='ms-MY';
-
- if(/private|senyap/.test(t))
-  return setMode('Private');
-
- if(/work mode|mode kerja/.test(t))
-  return setMode('Work');
-
- if(/ambient|ambien/.test(t))
-  return setMode('Ambient');
-
- if(
-  /stop listening|mute microphone|berhenti dengar|tutup mikrofon/.test(t)
- ){
-
-  stopListen();
-
-  return say(
-   ms
-    ?'Mikrofon dihentikan.'
-    :'Microphone listening stopped.'
-  );
-
- }
-
- if(/what mode|current mode|mode apa/.test(t))
-
-  return say(
-   ms
-    ?'Mode semasa ialah '+state.mode+'.'
-    :'Current mode is '+state.mode+'.'
-  );
-
- if(
-  /what did i forget|tasks|to-do|apa perlu buat|tugas/.test(t)
- ){
-
-  return say(
-   state.tasks.length
-    ?state.tasks.map((x,i)=>`${i+1}. ${x}`).join('\n')
-    :(ms
-      ?'Tiada tugasan disimpan.'
-      :'You have no stored tasks.')
-  );
-
- }
-
- if(
-  /add task|remind me|tambah tugas|ingatkan saya/.test(t)
- ){
-
-  let x=text.replace(
-   /add task|remind me|tambah tugas|ingatkan saya/ig,
-   ''
-  ).trim();
-
-  if(x){
-
-   state.tasks.push(x);
-
-   renderTasks();
-   persist();
-
-   return say(
-    ms
-     ?'Tugasan disimpan.'
-     :'Task stored.'
-   );
-
-  }
-
- }
-
- if(
-  /investment|buy|sell|trade|pelaburan|beli|jual/.test(t)
- ){
-
-  return say(
-   ms
-    ?'Analisis pelaburan boleh menyediakan bukti dan cadangan, tetapi transaksi kewangan memerlukan kelulusan jelas anda.'
-    :'Investment analysis can prepare evidence and a recommendation, but any financial transaction requires your explicit approval.'
-  );
-
- }
-
- if(/hello|hi jarvis|hey jarvis|hai jarvis|hai/.test(t))
-
-  return say(
-   ms
-    ?'Selamat malam, Azwan. JARVIS sedia.'
-    :'Good evening, Azwan. JARVIS is ready.'
-  );
-
- return say(
-  ms
-   ?'Baik, Azwan. Saya terima arahan itu dan simpan dalam konteks semasa.'
-   :'Understood, Azwan. I have recorded that command in the current context. Full external execution remains permission-gated.'
- );
-
-}
-
-function handle(text){
-
- text=text.trim();
-
+ text=(text||"").trim();
  if(!text)return;
 
- state.turns.push({
-  role:'user',
-  text,
-  time:Date.now()
- });
+ response.textContent="Analysing...";
+ setStatus("PROCESSING");
 
- state.turns=state.turns.slice(-40);
+ try{
 
- persist();
+   const r=await fetch("/api/chat",{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({
+       message:text
+     })
+   });
 
- log('USER: '+text);
+   if(!r.ok)throw new Error("AI backend unavailable");
 
- brain(text);
+   const data=await r.json();
 
-}
+   const answer=data.answer||
+                data.message||
+                "I received the request.";
 
-function renderTasks(){
+   response.textContent=answer;
+   speak(answer);
 
- $('tasks').textContent=
-  state.tasks.length
-   ?state.tasks.map((x,i)=>`${i+1}. ${x}`).join('\n')
-   :'No tasks stored.';
+ }catch(err){
 
-}
+   console.error(err);
 
-function addTask(){
+   const fallback=
+     "The JARVIS interface is working, but the AI brain gateway is not connected yet.";
 
- let x=prompt('Task');
-
- if(x){
-
-  state.tasks.push(x);
-
-  renderTasks();
-
-  persist();
-
-  say('Task stored.');
-
+   response.textContent=fallback;
+   speak(fallback);
+   setStatus("BRAIN OFFLINE");
  }
-
-}
-
-function showSettings(){
-
- $('settings').classList.toggle('open');
-
- populateVoices();
-
- $('log').textContent=
-  state.logs.join('\n');
-
-}
-
-function populateVoices(){
-
- let vs=speechSynthesis.getVoices();
-
- $('voiceSelect').innerHTML=
-  vs.map(v=>
-   `<option value="${v.name.replace(/"/g,'&quot;')}">
-    ${v.name} — ${v.lang}
-   </option>`
-  ).join('');
-
- let v=chooseVoice();
-
- if(v)
-  $('voiceSelect').value=v.name;
-
- $('voiceState').textContent=
-  v
-   ?'MALE • '+v.lang
-   :'MALE VOICE UNAVAILABLE';
-
-}
-
-function saveSettings(){
-
- let v=$('voiceSelect').value;
-
- if(v)
-  localStorage.setItem('jarvisVoice',v);
-
- localStorage.setItem(
-  'jarvisEndpoint',
-  $('endpoint').value
- );
-
- say(
-  'Voice preference saved. Male British English is prioritised when the device provides a suitable voice.'
- );
-
-}
-
-let micStream = null;
-let recognition = null;
-let listening = false;
-let micStarting = false;
-let recognitionBusy = false;
-
-async function primeMicrophone(){
-
-    if(!navigator.mediaDevices ||
-       !navigator.mediaDevices.getUserMedia){
-
-        throw new Error('Microphone API unavailable');
-
-    }
-
-    try{
-
-        if(micStream){
-            micStream.getTracks().forEach(t=>t.stop());
-        }
-
-        micStream =
-            await navigator.mediaDevices.getUserMedia({
-                audio:{
-                    echoCancellation:true,
-                    noiseSuppression:true,
-                    autoGainControl:true
-                }
-            });
-
-        return true;
-
-    }catch(err){
-
-        log('MIC ERROR: '+err.name);
-
-        $('status').textContent =
-            'MIC PERMISSION ERROR';
-
-        $('voiceState').textContent =
-            'MIC ERROR • '+err.name;
-
-        return false;
-    }
 }
 
 
-function createRecognition(){
-
-    const SR =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-    if(!SR){
-
-        $('status').textContent =
-            'SPEECH API UNAVAILABLE';
-
-        $('voiceState').textContent =
-            'SPEECH RECOGNITION UNSUPPORTED';
-
-        return null;
-    }
-
-    const r = new SR();
-
-    r.continuous = false;
-    r.interimResults = false;
-    r.maxAlternatives = 1;
-
-    /*
-       Start in Malay because Bahasa Malaysia
-       is JARVIS AZWAN's primary conversation language.
-    */
-    r.lang = 'ms-MY';
-
-    r.onstart = ()=>{
-
-        listening = true;
-        micStarting = false;
-        recognitionBusy = true;
-
-        $('mic').classList.add('on');
-
-        $('status').textContent =
-            'LISTENING';
-
-        $('voiceState').textContent =
-            'LISTENING • MS-MY';
-
-        log('MIC: recognition started');
-
-    };
-
-
-    r.onresult = e=>{
-
-        if(!e.results ||
-           !e.results.length)return;
-
-        const result =
-            e.results[e.results.length-1];
-
-        if(!result ||
-           !result[0])return;
-
-        const text =
-            result[0].transcript.trim();
-
-        if(!text)return;
-
-        log('MIC TRANSCRIPT: '+text);
-
-        /*
-           Stop recognition BEFORE JARVIS speaks.
-           This is important on iOS Safari.
-        */
-        try{
-            r.stop();
-        }catch(e){}
-
-        listening = false;
-        recognitionBusy = false;
-
-        $('mic').classList.remove('on');
-
-        $('status').textContent =
-            'PROCESSING';
-
-        handle(text);
-
-    };
-
-
-    r.onerror = e=>{
-
-        listening = false;
-        micStarting = false;
-        recognitionBusy = false;
-
-        $('mic').classList.remove('on');
-
-        log(
-            'MIC ERROR: '+
-            (e.error || 'unknown')
-        );
-
-        if(e.error === 'not-allowed'){
-
-            $('status').textContent =
-                'MIC PERMISSION DENIED';
-
-            $('voiceState').textContent =
-                'ALLOW MICROPHONE';
-
-        }
-        else if(e.error === 'no-speech'){
-
-            $('status').textContent =
-                'NO SPEECH DETECTED';
-
-        }
-        else if(e.error === 'service-not-allowed'){
-
-            $('status').textContent =
-                'SPEECH SERVICE BLOCKED';
-
-        }
-        else{
-
-            $('status').textContent =
-                'MIC ERROR';
-
-        }
-
-    };
-
-
-    r.onend = ()=>{
-
-        listening = false;
-        micStarting = false;
-        recognitionBusy = false;
-
-        $('mic').classList.remove('on');
-
-        if(
-            $('status').textContent === 'LISTENING'
-        ){
-
-            $('status').textContent =
-                'CORE ONLINE';
-
-        }
-
-    };
-
-    return r;
-}
-
-
-async function startListen(){
-
-    if(state.mode === 'Private'){
-        return;
-    }
-
-    if(listening ||
-       micStarting ||
-       recognitionBusy){
-
-        return;
-    }
-
-    micStarting = true;
-
-    $('status').textContent =
-        'MIC INITIALISING';
-
-    $('voiceState').textContent =
-        'REQUESTING MICROPHONE';
-
-    /*
-       Explicitly request microphone permission first.
-       This makes Safari initialise the audio session
-       before SpeechRecognition starts.
-    */
-    const micOK =
-        await primeMicrophone();
-
-    if(!micOK){
-
-        micStarting = false;
-        return;
-    }
-
-    /*
-       Re-create the recognizer every time.
-       This avoids the stuck SpeechRecognition
-       session problem seen on iOS Safari.
-    */
-    recognition =
-        createRecognition();
-
-    if(!recognition){
-
-        micStarting = false;
-        return;
-    }
-
-    /*
-       Give iOS a short moment after microphone
-       activation before starting recognition.
-    */
-    setTimeout(()=>{
-
-        if(!recognition ||
-           listening){
-
-            micStarting = false;
-            return;
-        }
-
-        try{
-
-            recognition.start();
-
-        }catch(err){
-
-            log(
-                'MIC START ERROR: '+
-                err.message
-            );
-
-            micStarting = false;
-
-            $('status').textContent =
-                'MIC START FAILED';
-
-        }
-
-    },250);
-
-}
-
-
-function stopListen(){
-
-    state.workLoop = false;
-
-    if(recognition){
-
-        try{
-            recognition.abort();
-        }catch(e){}
-
-        recognition = null;
-    }
-
-    if(micStream){
-
-        micStream
-            .getTracks()
-            .forEach(t=>t.stop());
-
-        micStream = null;
-    }
-
-    listening = false;
-    micStarting = false;
-    recognitionBusy = false;
-
-    $('mic').classList.remove('on');
-
-    $('status').textContent =
-        'MIC OFF';
-
-    $('voiceState').textContent =
-        'MIC OFF';
-
-    persist();
-
-}
-
-
-function toggleListen(){
-
-    if(listening ||
-       micStarting ||
-       recognitionBusy){
-
-        stopListen();
-        return;
-    }
-
-    if(state.mode === 'Private'){
-
-        say(
-            'Private mode is active. Microphone is off.'
-        );
-
-        return;
-    }
-
-    state.workLoop = false;
-
-    persist();
-
-    startListen();
-
-}
-
- if(listening){
-
-  stopListen();
-
- }else{
-
-  state.workLoop=
-   state.mode==='Work';
-
-  persist();
-
-  startListen();
-
+/* =========================================================
+   TEXT COMMAND
+   ========================================================= */
+
+document.getElementById("send").onclick=()=>{
+ ask(command.value);
+ command.value="";
+};
+
+command.addEventListener("keydown",e=>{
+ if(e.key==="Enter"){
+   ask(command.value);
+   command.value="";
  }
-
-}
-
-$('cmd').addEventListener(
- 'keydown',
- e=>{
-
-  if(e.key==='Enter'){
-
-   handle(e.target.value);
-
-   e.target.value='';
-
-  }
-
- }
-);
-
-speechSynthesis.onvoiceschanged=
- populateVoices;
-
-renderModes();
-
-renderTasks();
-
-setupSpeech();
-
-populateVoices();
-
-$('endpoint').value=
- localStorage.getItem('jarvisEndpoint')||'';
-
-log(
- 'v4.2 initialised — original HUD preserved; core enlarged; male voice fallback disabled.'
-);
-
+});
 </script>
 
 </body>
