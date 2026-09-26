@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     }
 
     const apiKey = process.env.POE_API_KEY;
-    const model = process.env.POE_MODEL || "assistant";
+    const model = process.env.POE_MODEL || "gpt-5.4-nano";
 
     if (!apiKey) {
       return res.status(500).json({
