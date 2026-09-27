@@ -7,15 +7,19 @@ export default async function handler(req, res) {
     const { message } = req.body || {};
 
     if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: { message: "Missing message" } });
+      return res.status(400).json({
+        error: { message: "Missing message" }
+      });
     }
 
-    const apiKey = process.env.POE_API_KEY;
-    const model = process.env.POE_MODEL || "gpt-5.4-nano";
+    const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 
     if (!apiKey) {
       return res.status(500).json({
-        error: { message: "POE_API_KEY is not configured in this Vercel deployment." }
+        error: {
+          message: "GEMINI_API_KEY is not configured in this Vercel deployment."
+        }
       });
     }
 
@@ -27,71 +31,91 @@ Identity:
 - Address the owner as Azwan.
 - Calm, intelligent, concise and natural.
 - Do not behave like Siri.
-- Do not give irrelevant canned answers.
 
 Language:
 - If Azwan speaks Malay, answer naturally in Bahasa Malaysia.
 - If Azwan speaks English, answer in English.
-- Use Mandarin when requested for supplier/client communication.
+- Use Mandarin when requested.
 
 Behaviour:
-- Answer general questions naturally.
-- Understand the immediate conversation context.
-- Help with work, building maintenance, vendors, reports, documents, technology, gaming, travel and everyday tasks.
+- Answer questions naturally.
+- Understand conversation context.
+- Help with work, building maintenance, vendors, reports,
+  documents, technology, gaming, travel and everyday tasks.
 - Do not invent information.
 - Never claim an action was completed unless it was actually executed.
 
 Security:
 - Never expose API keys or secrets.
-- Financial BUY, SELL, DEPOSIT, WITHDRAW and TRANSFER actions require explicit owner approval.
+- Financial BUY, SELL, DEPOSIT, WITHDRAW and TRANSFER actions
+  require explicit owner approval.
 - Never infer financial approval from ambiguous language.
-- Never store private keys or seed phrases.
 `;
 
-    const poe = await fetch("https://api.poe.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: message }
-        ],
-        temperature: 0.4,
-        max_tokens: 1500,
-        stream: false
-      })
-    });
+    const response = await fetch(
+      \`https://generativelanguage.googleapis.com/v1beta/models/\${encodeURIComponent(model)}:generateContent\`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: system }]
+          },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: message }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 1500
+          }
+        })
+      }
+    );
 
-    const raw = await poe.text();
+    const raw = await response.text();
+
     let data;
-    try { data = JSON.parse(raw); }
-    catch { data = { raw }; }
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { raw };
+    }
 
-    if (!poe.ok) {
+    if (!response.ok) {
       const upstream =
         data?.error?.message ||
         data?.message ||
         data?.raw ||
-        `Poe API returned HTTP ${poe.status}`;
+        \`Gemini API returned HTTP \${response.status}\`;
 
-      console.error("Poe API error:", poe.status, upstream);
+      console.error("Gemini API error:", response.status, upstream);
+
       return res.status(502).json({
         error: {
-          message: `Poe API error ${poe.status}: ${upstream}`
+          message: \`Gemini API error \${response.status}: \${upstream}\`
         }
       });
     }
 
-    const answer = data?.choices?.[0]?.message?.content;
+    const answer =
+      data?.candidates?.[0]?.content?.parts
+        ?.filter(part => typeof part?.text === "string")
+        ?.map(part => part.text)
+        ?.join("") || "";
 
     if (!answer) {
-      console.error("Unexpected Poe response:", data);
+      console.error("Unexpected Gemini response:", data);
+
       return res.status(502).json({
-        error: { message: "Poe returned no assistant message." }
+        error: {
+          message: "Gemini returned no assistant message."
+        }
       });
     }
 
@@ -99,9 +123,10 @@ Security:
 
   } catch (error) {
     console.error("JARVIS gateway exception:", error);
+
     return res.status(500).json({
       error: {
-        message: `JARVIS gateway exception: ${error?.message || "Unknown error"}`
+        message: \`JARVIS gateway exception: \${error?.message || "Unknown error"}\`
       }
     });
   }
