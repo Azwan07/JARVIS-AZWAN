@@ -2,313 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1,viewport-fit=cover"
->
-
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-
 <title>JARVIS AZWAN</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#020304;
+  color:#e9faff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden
 }
 
-html,
-body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: #020304;
-  color: #e9faff;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  overflow: hidden;
-}
-
-body {
+body{
   background:
-    radial-gradient(
-      circle at 50% 42%,
-      rgba(255,120,0,.08),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 50% 50%,
-      #101010 0%,
-      #030405 60%,
-      #000 100%
-    );
+    radial-gradient(circle at 50% 42%,rgba(255,120,0,.08),transparent 28%),
+    radial-gradient(circle at 50% 50%,#101010 0%,#030405 60%,#000 100%)
 }
 
-.app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.app{height:100%;display:flex;flex-direction:column}
+
+header{
+  height:64px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,120,0,.5);
+  background:rgba(0,0,0,.7)
 }
 
-header {
-  height: 64px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.brand{color:#ff8a00;font-weight:800;letter-spacing:2px}
+.sub{font-size:9px;color:#6defff;letter-spacing:2px}
+.status{font-size:10px;color:#6defff}
 
-  border-bottom:
-    1px solid rgba(255,120,0,.5);
-
-  background:
-    rgba(0,0,0,.7);
+main{
+  flex:1;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden
 }
 
-.brand {
-  color: #ff8a00;
-  font-weight: 800;
-  letter-spacing: 2px;
+.core{
+  position:relative;
+  width:min(72vw,390px);
+  height:min(72vw,390px)
 }
 
-.sub {
-  font-size: 9px;
-  color: #6defff;
-  letter-spacing: 2px;
+.core canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%
 }
 
-.status {
-  font-size: 10px;
-  color: #6defff;
+.core-label{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  text-align:center
 }
 
-main {
-  flex: 1;
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
+.core-label strong{
+  color:#ff9a18;
+  font-size:28px;
+  letter-spacing:7px;
+  text-shadow:0 0 15px #ff6a00,0 0 40px #ff6a00
 }
 
-.core {
-  position: relative;
-
-  width: min(72vw,390px);
-  height: min(72vw,390px);
+.core-label span{
+  color:#6defff;
+  font-size:10px;
+  letter-spacing:4px;
+  margin-top:5px
 }
 
-.core canvas {
-  position: absolute;
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
+.panel{
+  position:absolute;
+  border:1px solid rgba(255,130,0,.45);
+  background:rgba(5,8,10,.78);
+  box-shadow:0 0 20px rgba(255,100,0,.08);
+  backdrop-filter:blur(8px);
+  padding:10px
 }
 
-.core-label {
-  position: absolute;
-  inset: 0;
+.left{left:10px;top:15px;width:190px}
+.right{right:10px;top:15px;width:190px}
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  pointer-events: none;
-  text-align: center;
+.panel h3{
+  margin:0 0 8px;
+  color:#ff8a00;
+  font-size:10px;
+  letter-spacing:2px
 }
 
-.core-label strong {
-  color: #ff9a18;
-
-  font-size: 28px;
-  letter-spacing: 7px;
-
-  text-shadow:
-    0 0 15px #ff6a00,
-    0 0 40px #ff6a00;
+.item{
+  font-size:10px;
+  color:#b9d9df;
+  padding:5px 0;
+  border-bottom:1px solid rgba(255,255,255,.05)
 }
 
-.core-label span {
-  color: #6defff;
+.item b{color:#6defff}
 
-  font-size: 10px;
-  letter-spacing: 4px;
-
-  margin-top: 5px;
+.bottom{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(92%,600px)
 }
 
-.panel {
-  position: absolute;
-
-  border:
-    1px solid rgba(255,130,0,.45);
-
-  background:
-    rgba(5,8,10,.78);
-
-  box-shadow:
-    0 0 20px rgba(255,100,0,.08);
-
-  backdrop-filter: blur(8px);
-
-  padding: 10px;
+.response{
+  min-height:48px;
+  color:#dffaff;
+  font-size:13px;
+  line-height:1.45;
+  white-space:pre-wrap
 }
 
-.left {
-  left: 10px;
-  top: 15px;
-  width: 190px;
+.controls{display:flex;gap:8px;margin-top:8px}
+
+input{
+  flex:1;
+  min-width:0;
+  background:#070a0c;
+  border:1px solid rgba(255,130,0,.5);
+  color:white;
+  padding:12px;
+  border-radius:4px;
+  outline:none;
+  font-size:16px
 }
 
-.right {
-  right: 10px;
-  top: 15px;
-  width: 190px;
+button{
+  border:1px solid #ff8a00;
+  background:#100b05;
+  color:#ff9a18;
+  padding:11px 15px;
+  border-radius:4px;
+  font-weight:700;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent
 }
 
-.panel h3 {
-  margin: 0 0 8px;
+button:active{transform:scale(.97)}
 
-  color: #ff8a00;
-
-  font-size: 10px;
-  letter-spacing: 2px;
+.mic.on{
+  background:#ff6a00;
+  color:#000;
+  box-shadow:0 0 18px #ff6a00
 }
 
-.item {
-  font-size: 10px;
-  color: #b9d9df;
-
-  padding: 5px 0;
-
-  border-bottom:
-    1px solid rgba(255,255,255,.05);
+.wake{
+  font-size:9px;
+  margin-top:6px;
+  color:#6defff;
+  letter-spacing:1px;
+  text-align:center
 }
 
-.item b {
-  color: #6defff;
-}
-
-.bottom {
-  position: absolute;
-
-  bottom: 10px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  width: min(92%,600px);
-}
-
-.response {
-  min-height: 48px;
-
-  color: #dffaff;
-
-  font-size: 13px;
-  line-height: 1.45;
-
-  white-space: pre-wrap;
-}
-
-.controls {
-  display: flex;
-
-  gap: 8px;
-
-  margin-top: 8px;
-}
-
-input {
-  flex: 1;
-
-  min-width: 0;
-
-  background: #070a0c;
-
-  border:
-    1px solid rgba(255,130,0,.5);
-
-  color: white;
-
-  padding: 12px;
-
-  border-radius: 4px;
-
-  outline: none;
-
-  font-size: 16px;
-}
-
-button {
-  border:
-    1px solid #ff8a00;
-
-  background: #100b05;
-
-  color: #ff9a18;
-
-  padding: 11px 15px;
-
-  border-radius: 4px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:active {
-  transform: scale(.97);
-}
-
-.mic.on {
-  background: #ff6a00;
-
-  color: #000;
-
-  box-shadow:
-    0 0 18px #ff6a00;
-}
-
-.wake {
-  font-size: 9px;
-
-  margin-top: 6px;
-
-  color: #6defff;
-
-  letter-spacing: 1px;
-
-  text-align: center;
-}
-
-@media(max-width:700px) {
-
-  .left,
-  .right {
-    display: none;
-  }
-
-  .core {
-    width: 82vw;
-    height: 82vw;
-  }
-
-  .bottom {
-    bottom: 8px;
-  }
-
-  .controls button {
-    min-width: 64px;
-  }
+@media(max-width:700px){
+  .left,.right{display:none}
+  .core{width:82vw;height:82vw}
+  .bottom{bottom:8px}
+  .controls button{min-width:64px}
 }
 </style>
 </head>
@@ -318,115 +187,44 @@ button:active {
 <div class="app">
 
 <header>
-
   <div>
-    <div class="brand">
-      JARVIS AZWAN
-    </div>
-
-    <div class="sub">
-      PERSONAL AI ASSISTANT
-    </div>
+    <div class="brand">JARVIS AZWAN</div>
+    <div class="sub">PERSONAL AI ASSISTANT</div>
   </div>
-
-  <div
-    class="status"
-    id="status"
-  >
-    STARTING
-  </div>
-
+  <div class="status" id="status">STARTING</div>
 </header>
-
 
 <main>
 
 <section class="panel left">
-
   <h3>TODAY'S TASKS</h3>
-
-  <div class="item">
-    <b>01</b> Building maintenance
-  </div>
-
-  <div class="item">
-    <b>02</b> Vendor follow-up
-  </div>
-
-  <div class="item">
-    <b>03</b> Payment tracking
-  </div>
-
-  <div class="item">
-    <b>04</b> Report preparation
-  </div>
-
+  <div class="item"><b>01</b> Building maintenance</div>
+  <div class="item"><b>02</b> Vendor follow-up</div>
+  <div class="item"><b>03</b> Payment tracking</div>
+  <div class="item"><b>04</b> Report preparation</div>
 </section>
-
 
 <div class="core">
-
   <canvas id="coreCanvas"></canvas>
-
   <div class="core-label">
-
-    <strong>
-      JARVIS
-    </strong>
-
-    <span>
-      AZWAN CORE
-    </span>
-
+    <strong>JARVIS</strong>
+    <span>AZWAN CORE</span>
   </div>
-
 </div>
 
-
 <section class="panel right">
-
   <h3>CORE STATUS</h3>
-
-  <div class="item">
-    BRAIN
-    <b id="brainState">
-      CHECKING
-    </b>
-  </div>
-
-  <div class="item">
-    MEMORY
-    <b>
-      ACTIVE
-    </b>
-  </div>
-
-  <div class="item">
-    VOICE
-    <b id="voiceState">
-      READY
-    </b>
-  </div>
-
-  <div class="item">
-    WAKE
-    <b id="wakeState">
-      STARTING
-    </b>
-  </div>
-
+  <div class="item">BRAIN <b id="brainState">CHECKING</b></div>
+  <div class="item">MEMORY <b>ACTIVE</b></div>
+  <div class="item">VOICE <b id="voiceState">READY</b></div>
+  <div class="item">WAKE <b id="wakeState">TAP MIC</b></div>
 </section>
-
 
 <section class="panel bottom">
 
-  <div
-    class="response"
-    id="response"
-  >
+  <div class="response" id="response">
     Initializing JARVIS brain gateway...
   </div>
-
 
   <div class="controls">
 
@@ -438,31 +236,24 @@ button:active {
       enterkeyhint="send"
     >
 
-    <button id="send">
-      SEND
-    </button>
+    <button id="send">SEND</button>
 
     <button
       id="mic"
       class="mic"
       aria-label="Microphone"
-    >
-      MIC
-    </button>
+    >MIC</button>
 
   </div>
 
-
   <div class="wake">
-    WAKE WORD: "JARVIS" • SEND remains as text fallback
+    WAKE WORD: "JARVIS" • TAP MIC TO ACTIVATE VOICE
   </div>
 
 </section>
 
 </main>
-
 </div>
-
 
 <script>
 
@@ -470,131 +261,56 @@ button:active {
    JARVIS CORE VISUAL
    ========================================================= */
 
-const canvas =
-  document.getElementById("coreCanvas");
+const canvas=document.getElementById("coreCanvas");
+const ctx=canvas.getContext("2d");
 
-const ctx =
-  canvas.getContext("2d");
+let W,H,DPR;
+let speaking=false;
+let listening=false;
+let wakeMode=false;
+let recognition=null;
+let wakeRestart=null;
 
-let W;
-let H;
-let DPR;
+function resize(){
 
-let speaking = false;
-let listening = false;
+  DPR=window.devicePixelRatio||1;
 
-let wakeMode = false;
+  const r=canvas.getBoundingClientRect();
 
-let recognition = null;
-let wakeRestart = null;
+  W=r.width;
+  H=r.height;
 
+  canvas.width=W*DPR;
+  canvas.height=H*DPR;
 
-/* =========================================================
-   CANVAS
-   ========================================================= */
-
-function resize() {
-
-  DPR =
-    window.devicePixelRatio || 1;
-
-  const r =
-    canvas.getBoundingClientRect();
-
-  W = r.width;
-  H = r.height;
-
-  canvas.width =
-    W * DPR;
-
-  canvas.height =
-    H * DPR;
-
-  ctx.setTransform(
-    DPR,
-    0,
-    0,
-    DPR,
-    0,
-    0
-  );
+  ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 
-window.addEventListener(
-  "resize",
-  resize
-);
-
+window.addEventListener("resize",resize);
 resize();
 
+const particles=Array.from({length:260},()=>({
+  a:Math.random()*Math.PI*2,
+  r:.12+Math.random()*.42,
+  z:Math.random(),
+  s:.002+Math.random()*.009,
+  size:.4+Math.random()*1.8
+}));
 
-const particles =
-  Array.from(
-    { length: 260 },
-    () => ({
-      a:
-        Math.random() *
-        Math.PI *
-        2,
+function drawCore(t){
 
-      r:
-        .12 +
-        Math.random() *
-        .42,
+  ctx.clearRect(0,0,W,H);
 
-      z:
-        Math.random(),
-
-      s:
-        .002 +
-        Math.random() *
-        .009,
-
-      size:
-        .4 +
-        Math.random() *
-        1.8
-    })
-  );
-
-
-function drawCore(t) {
-
-  ctx.clearRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-  const cx =
-    W / 2;
-
-  const cy =
-    H / 2;
-
-  const R =
-    Math.min(W,H) * .34;
+  const cx=W/2;
+  const cy=H/2;
+  const R=Math.min(W,H)*.34;
 
   ctx.save();
+  ctx.translate(cx,cy);
 
-  ctx.translate(
-    cx,
-    cy
-  );
+  for(let i=0;i<7;i++){
 
-
-  /* orbital rings */
-
-  for (
-    let i = 0;
-    i < 7;
-    i++
-  ) {
-
-    const rr =
-      R *
-      (1.05 + i * .11);
+    const rr=R*(1.05+i*.11);
 
     ctx.beginPath();
 
@@ -602,97 +318,36 @@ function drawCore(t) {
       0,
       0,
       rr,
-      t * .0002 *
-        (i % 2 ? 1 : -1)
-        + i * .7,
-
-      t * .0002 *
-        (i % 2 ? 1 : -1)
-        + i * .7
-        + Math.PI * 1.35
+      t*.0002*(i%2?1:-1)+i*.7,
+      t*.0002*(i%2?1:-1)+i*.7+Math.PI*1.35
     );
 
-    ctx.strokeStyle =
-      `rgba(
-        255,
-        ${120 + i * 12},
-        20,
-        ${.12 - i * .011}
-      )`;
+    ctx.strokeStyle=
+      `rgba(255,${120+i*12},20,${.12-i*.011})`;
 
-    ctx.lineWidth =
-      i % 2 ? 1 : .7;
-
+    ctx.lineWidth=i%2?1:.7;
     ctx.stroke();
   }
 
+  const g=ctx.createRadialGradient(0,0,0,0,0,R*1.2);
 
-  /* outer glow */
+  g.addColorStop(0,"rgba(255,230,150,.9)");
+  g.addColorStop(.08,"rgba(255,150,20,.75)");
+  g.addColorStop(.28,"rgba(255,80,0,.25)");
+  g.addColorStop(.65,"rgba(255,70,0,.06)");
+  g.addColorStop(1,"rgba(255,60,0,0)");
 
-  const g =
-    ctx.createRadialGradient(
-      0,
-      0,
-      0,
-      0,
-      0,
-      R * 1.2
-    );
-
-  g.addColorStop(
-    0,
-    "rgba(255,230,150,.9)"
-  );
-
-  g.addColorStop(
-    .08,
-    "rgba(255,150,20,.75)"
-  );
-
-  g.addColorStop(
-    .28,
-    "rgba(255,80,0,.25)"
-  );
-
-  g.addColorStop(
-    .65,
-    "rgba(255,70,0,.06)"
-  );
-
-  g.addColorStop(
-    1,
-    "rgba(255,60,0,0)"
-  );
-
-  ctx.fillStyle = g;
-
+  ctx.fillStyle=g;
   ctx.beginPath();
-
-  ctx.arc(
-    0,
-    0,
-    R * 1.2,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(0,0,R*1.2,0,Math.PI*2);
   ctx.fill();
 
-
-  /* orbital ellipses */
-
-  for (
-    let j = 0;
-    j < 9;
-    j++
-  ) {
+  for(let j=0;j<9;j++){
 
     ctx.save();
 
     ctx.rotate(
-      t * .0004 *
-      (j % 2 ? 1 : -1)
-      + j * .7
+      t*.0004*(j%2?1:-1)+j*.7
     );
 
     ctx.beginPath();
@@ -700,250 +355,117 @@ function drawCore(t) {
     ctx.ellipse(
       0,
       0,
-      R * (.65 + j * .045),
-      R * (.16 + j * .012),
+      R*(.65+j*.045),
+      R*(.16+j*.012),
       0,
       0,
-      Math.PI * 2
+      Math.PI*2
     );
 
-    ctx.strokeStyle =
-      `rgba(
-        255,
-        ${110 + j * 15},
-        25,
-        ${.25 - j * .018}
-      )`;
+    ctx.strokeStyle=
+      `rgba(255,${110+j*15},25,${.25-j*.018})`;
 
     ctx.stroke();
-
     ctx.restore();
   }
 
+  for(const p of particles){
 
-  /* particles */
+    p.a+=p.s;
 
-  for (const p of particles) {
+    const rr=R*(.35+p.r);
 
-    p.a += p.s;
+    const x=Math.cos(p.a)*rr;
+    const y=Math.sin(p.a)*rr*.62;
 
-    const rr =
-      R * (.35 + p.r);
-
-    const x =
-      Math.cos(p.a) * rr;
-
-    const y =
-      Math.sin(p.a) * rr * .62;
-
-    ctx.fillStyle =
-      `rgba(
-        255,
-        ${100 + Math.random() * 100},
-        30,
-        ${.3 + p.z * .7}
-      )`;
+    ctx.fillStyle=
+      `rgba(255,${100+Math.random()*100},30,${.3+p.z*.7})`;
 
     ctx.beginPath();
-
-    ctx.arc(
-      x,
-      y,
-      p.size,
-      0,
-      Math.PI * 2
-    );
-
+    ctx.arc(x,y,p.size,0,Math.PI*2);
     ctx.fill();
 
+    if(p.z>.7){
 
-    if (p.z > .7) {
-
-      ctx.strokeStyle =
-        "rgba(255,130,30,.18)";
+      ctx.strokeStyle="rgba(255,130,30,.18)";
 
       ctx.beginPath();
-
-      ctx.moveTo(
-        x,
-        y
-      );
-
-      ctx.lineTo(
-        x * .72,
-        y * .72
-      );
-
+      ctx.moveTo(x,y);
+      ctx.lineTo(x*.72,y*.72);
       ctx.stroke();
     }
   }
 
+  const pulse=
+    1+
+    Math.sin(t*.004)*(speaking?.10:.035)+
+    Math.sin(t*.009)*.018;
 
-  /* central core */
+  const coreR=R*.27*pulse;
 
-  const pulse =
-    1 +
-    Math.sin(t * .004) *
-    (speaking ? .10 : .035) +
-    Math.sin(t * .009) *
-    .018;
-
-  const coreR =
-    R * .27 * pulse;
-
-
-  const cg =
-    ctx.createRadialGradient(
-      0,
-      0,
-      0,
-      0,
-      0,
-      coreR * 1.8
-    );
-
-  cg.addColorStop(
-    0,
-    "rgba(255,255,220,1)"
+  const cg=ctx.createRadialGradient(
+    0,0,0,0,0,coreR*1.8
   );
 
-  cg.addColorStop(
-    .08,
-    "rgba(255,190,60,.95)"
-  );
+  cg.addColorStop(0,"rgba(255,255,220,1)");
+  cg.addColorStop(.08,"rgba(255,190,60,.95)");
+  cg.addColorStop(.35,"rgba(255,100,0,.55)");
+  cg.addColorStop(1,"rgba(255,50,0,0)");
 
-  cg.addColorStop(
-    .35,
-    "rgba(255,100,0,.55)"
-  );
-
-  cg.addColorStop(
-    1,
-    "rgba(255,50,0,0)"
-  );
-
-  ctx.fillStyle = cg;
-
+  ctx.fillStyle=cg;
   ctx.beginPath();
-
-  ctx.arc(
-    0,
-    0,
-    coreR * 1.8,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(0,0,coreR*1.8,0,Math.PI*2);
   ctx.fill();
 
+  for(let k=0;k<35;k++){
 
-  for (
-    let k = 0;
-    k < 35;
-    k++
-  ) {
+    const a=t*.001*(k%2?1:-1)+k;
+    const len=coreR*(.5+Math.random()*.8);
 
-    const a =
-      t * .001 *
-      (k % 2 ? 1 : -1)
-      + k;
-
-    const len =
-      coreR *
-      (.5 + Math.random() * .8);
-
-    ctx.strokeStyle =
-      "rgba(255,160,40,.45)";
+    ctx.strokeStyle="rgba(255,160,40,.45)";
 
     ctx.beginPath();
 
     ctx.moveTo(
-      Math.cos(a) *
-        coreR * .3,
-
-      Math.sin(a) *
-        coreR * .3
+      Math.cos(a)*coreR*.3,
+      Math.sin(a)*coreR*.3
     );
 
     ctx.lineTo(
-      Math.cos(a) * len,
-      Math.sin(a) * len
+      Math.cos(a)*len,
+      Math.sin(a)*len
     );
 
     ctx.stroke();
   }
 
-
   ctx.restore();
 
-  requestAnimationFrame(
-    drawCore
-  );
+  requestAnimationFrame(drawCore);
 }
 
-requestAnimationFrame(
-  drawCore
-);
+requestAnimationFrame(drawCore);
 
 
 /* =========================================================
    ELEMENTS
    ========================================================= */
 
-const response =
-  document.getElementById(
-    "response"
-  );
+const response=document.getElementById("response");
+const status=document.getElementById("status");
+const voiceState=document.getElementById("voiceState");
+const wakeState=document.getElementById("wakeState");
+const brainState=document.getElementById("brainState");
+const mic=document.getElementById("mic");
+const command=document.getElementById("command");
+const send=document.getElementById("send");
 
-const status =
-  document.getElementById(
-    "status"
-  );
-
-const voiceState =
-  document.getElementById(
-    "voiceState"
-  );
-
-const wakeState =
-  document.getElementById(
-    "wakeState"
-  );
-
-const brainState =
-  document.getElementById(
-    "brainState"
-  );
-
-const mic =
-  document.getElementById(
-    "mic"
-  );
-
-const command =
-  document.getElementById(
-    "command"
-  );
-
-const send =
-  document.getElementById(
-    "send"
-  );
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-function setStatus(x) {
-
-  status.textContent = x;
+function setStatus(x){
+  status.textContent=x;
 }
 
-
-function setWake(x) {
-
-  wakeState.textContent = x;
+function setWake(x){
+  wakeState.textContent=x;
 }
 
 
@@ -951,215 +473,112 @@ function setWake(x) {
    SPEECH SYNTHESIS
    ========================================================= */
 
-let speechUnlocked = false;
-let selectedVoice = null;
+let speechUnlocked=false;
+let selectedVoice=null;
 
+function loadJarvisVoice(){
 
-function loadJarvisVoice() {
+  if(!("speechSynthesis" in window)) return;
 
-  if (
-    !("speechSynthesis" in window)
-  ) {
-    return;
-  }
+  const voices=speechSynthesis.getVoices();
 
-  const voices =
-    speechSynthesis.getVoices();
-
-
-  /*
-   * Prefer British English male
-   * voices when iOS provides them.
-   */
-
-  const preferred = [
-
+  const preferred=[
     "Daniel",
-
     "Arthur",
-
     "Oliver",
-
     "Google UK English Male",
-
     "Microsoft Ryan Online (Natural) - English (United Kingdom)",
-
     "Microsoft George Online (Natural) - English (United Kingdom)"
-
   ];
 
+  selectedVoice=null;
 
-  selectedVoice = null;
+  for(const name of preferred){
 
+    const found=voices.find(
+      v=>v.name.toLowerCase().includes(name.toLowerCase())
+    );
 
-  for (
-    const name of preferred
-  ) {
-
-    const found =
-      voices.find(
-        v =>
-          v.name
-            .toLowerCase()
-            .includes(
-              name.toLowerCase()
-            )
-      );
-
-    if (found) {
-
-      selectedVoice =
-        found;
-
+    if(found){
+      selectedVoice=found;
       break;
     }
   }
 
+  if(!selectedVoice){
 
-  /*
-   * Fallback to any British
-   * English voice.
-   */
-
-  if (!selectedVoice) {
-
-    selectedVoice =
-      voices.find(
-        v =>
-          v.lang &&
-          v.lang
-            .toLowerCase()
-            .startsWith("en-gb")
-      );
+    selectedVoice=voices.find(
+      v=>v.lang&&v.lang.toLowerCase().startsWith("en-gb")
+    );
   }
 
+  if(!selectedVoice){
 
-  /*
-   * Final fallback:
-   * any English voice.
-   */
-
-  if (!selectedVoice) {
-
-    selectedVoice =
-      voices.find(
-        v =>
-          v.lang &&
-          v.lang
-            .toLowerCase()
-            .startsWith("en")
-      );
+    selectedVoice=voices.find(
+      v=>v.lang&&v.lang.toLowerCase().startsWith("en")
+    );
   }
 }
 
-
-if (
-  "speechSynthesis" in window
-) {
+if("speechSynthesis" in window){
 
   loadJarvisVoice();
 
-  speechSynthesis.onvoiceschanged =
-    () => {
-
-      loadJarvisVoice();
-    };
+  speechSynthesis.onvoiceschanged=()=>{
+    loadJarvisVoice();
+  };
 }
 
 
 /*
- * iPhone/Safari speech unlock.
- *
- * This function is called directly
- * from the SEND/MIC user gesture.
+ * IMPORTANT:
+ * This function must be called directly
+ * from a real iPhone user gesture.
  */
 
-function unlockJarvisVoice() {
+function unlockJarvisVoice(){
 
-  if (
-    !("speechSynthesis" in window)
-  ) {
+  if(!("speechSynthesis" in window)){
 
-    console.error(
-      "Speech synthesis is not supported."
-    );
-
+    console.error("Speech synthesis is not supported.");
     return;
   }
 
-
-  try {
+  try{
 
     speechSynthesis.cancel();
-
     speechSynthesis.resume();
-
     loadJarvisVoice();
 
+    const unlock=new SpeechSynthesisUtterance("JARVIS");
 
-    /*
-     * Small silent-ish utterance.
-     *
-     * This establishes speech permission
-     * from the user's actual tap.
-     */
+    unlock.lang="en-GB";
+    unlock.volume=.01;
+    unlock.rate=1;
+    unlock.pitch=.8;
 
-    const unlock =
-      new SpeechSynthesisUtterance(
-        "JARVIS"
-      );
-
-    unlock.lang =
-      "en-GB";
-
-    unlock.volume =
-      0.01;
-
-    unlock.rate =
-      1;
-
-    unlock.pitch =
-      0.8;
-
-
-    if (selectedVoice) {
-
-      unlock.voice =
-        selectedVoice;
+    if(selectedVoice){
+      unlock.voice=selectedVoice;
     }
 
+    unlock.onend=()=>{
+      speechUnlocked=true;
+    };
 
-    unlock.onend =
-      () => {
+    unlock.onerror=event=>{
+      console.error(
+        "Speech unlock error:",
+        event.error
+      );
+    };
 
-        speechUnlocked =
-          true;
-      };
+    speechSynthesis.speak(unlock);
 
+    speechUnlocked=true;
 
-    unlock.onerror =
-      event => {
+    console.log("JARVIS speech engine unlocked.");
 
-        console.error(
-          "Speech unlock error:",
-          event.error
-        );
-      };
-
-
-    speechSynthesis.speak(
-      unlock
-    );
-
-    speechUnlocked =
-      true;
-
-
-    console.log(
-      "JARVIS speech engine unlocked."
-    );
-
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "Voice unlock failed:",
@@ -1169,15 +588,9 @@ function unlockJarvisVoice() {
 }
 
 
-/*
- * Actual JARVIS voice.
- */
+function speak(text){
 
-function speak(text) {
-
-  if (
-    !("speechSynthesis" in window)
-  ) {
+  if(!("speechSynthesis" in window)){
 
     console.error(
       "Speech synthesis unavailable."
@@ -1186,122 +599,70 @@ function speak(text) {
     return;
   }
 
+  if(!text) return;
 
-  if (!text) {
-    return;
-  }
-
-
-  try {
+  try{
 
     speechSynthesis.cancel();
-
     speechSynthesis.resume();
-
     loadJarvisVoice();
 
+    const utterance=
+      new SpeechSynthesisUtterance(String(text));
 
-    const utterance =
-      new SpeechSynthesisUtterance(
-        String(text)
-      );
+    utterance.lang="en-GB";
+    utterance.rate=.94;
+    utterance.pitch=.78;
+    utterance.volume=1;
 
+    if(selectedVoice){
 
-    /*
-     * British English.
-     */
-
-    utterance.lang =
-      "en-GB";
-
-
-    /*
-     * Jarvis-like delivery.
-     */
-
-    utterance.rate =
-      0.94;
-
-    utterance.pitch =
-      0.78;
-
-    utterance.volume =
-      1;
-
-
-    if (selectedVoice) {
-
-      utterance.voice =
-        selectedVoice;
+      utterance.voice=selectedVoice;
 
       console.log(
         "JARVIS voice:",
         selectedVoice.name,
         selectedVoice.lang
       );
-
-    } else {
-
-      console.log(
-        "No British voice found. Using iPhone default voice."
-      );
     }
 
+    utterance.onstart=()=>{
 
-    utterance.onstart =
-      () => {
+      speaking=true;
 
-        speaking =
-          true;
+      setStatus("SPEAKING");
 
-        setStatus(
-          "SPEAKING"
-        );
+      voiceState.textContent="SPEAKING";
+    };
 
-        voiceState.textContent =
-          "SPEAKING";
-      };
+    utterance.onend=()=>{
 
+      speaking=false;
 
-    utterance.onend =
-      () => {
+      voiceState.textContent="READY";
 
-        speaking =
-          false;
+      setStatus(
+        wakeMode
+          ? "LISTENING"
+          : "READY"
+      );
+    };
 
-        voiceState.textContent =
-          "READY";
+    utterance.onerror=event=>{
 
-        setStatus(
-          wakeMode
-            ? "LISTENING"
-            : "READY"
-        );
-      };
+      speaking=false;
 
+      voiceState.textContent="ERROR";
 
-    utterance.onerror =
-      event => {
+      console.error(
+        "JARVIS speech error:",
+        event.error
+      );
+    };
 
-        speaking =
-          false;
+    speechSynthesis.speak(utterance);
 
-        voiceState.textContent =
-          "ERROR";
-
-        console.error(
-          "JARVIS speech error:",
-          event.error
-        );
-      };
-
-
-    speechSynthesis.speak(
-      utterance
-    );
-
-
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "JARVIS speech exception:",
@@ -1315,64 +676,44 @@ function speak(text) {
    BRAIN CONNECTION
    ========================================================= */
 
-async function pingBrain() {
+async function pingBrain(){
 
-  try {
+  try{
 
-    const r =
-      await fetch(
-        "/api/chat",
-        {
-          method: "POST",
+    const r=await fetch(
+      "/api/chat",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message:"Reply with exactly: JARVIS ONLINE"
+        })
+      }
+    );
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+    const d=await r.json().catch(()=>({}));
 
-          body:
-            JSON.stringify({
-              message:
-                "Reply with exactly: JARVIS ONLINE"
-            })
-        }
-      );
-
-
-    const d =
-      await r
-        .json()
-        .catch(
-          () => ({})
-        );
-
-
-    if (!r.ok) {
+    if(!r.ok){
 
       throw new Error(
-        d?.error?.message ||
-        d?.error?.error?.message ||
-        d?.error ||
-        ("HTTP " + r.status)
+        d?.error?.message||
+        d?.error?.error?.message||
+        d?.error||
+        ("HTTP "+r.status)
       );
     }
 
-
-    brainState.textContent =
-      "ONLINE";
+    brainState.textContent="ONLINE";
 
     return true;
 
+  }catch(e){
 
-  } catch (e) {
+    brainState.textContent="ERROR";
 
-    brainState.textContent =
-      "ERROR";
-
-    console.error(
-      "Brain:",
-      e
-    );
+    console.error("Brain:",e);
 
     return false;
   }
@@ -1383,199 +724,132 @@ async function pingBrain() {
    SPEECH RECOGNITION
    ========================================================= */
 
-function stopRecognition() {
+function stopRecognition(){
 
-  try {
+  try{
 
-    if (recognition) {
-
+    if(recognition){
       recognition.stop();
     }
 
-  } catch (e) {}
+  }catch(e){}
 
+  recognition=null;
+  listening=false;
 
-  recognition =
-    null;
+  mic.classList.remove("on");
 
-  listening =
-    false;
-
-  mic.classList.remove(
-    "on"
-  );
-
-  voiceState.textContent =
-    "READY";
+  voiceState.textContent="READY";
 }
 
 
-function makeRecognition(mode) {
+function makeRecognition(mode){
 
-  const SR =
-    window.SpeechRecognition ||
+  const SR=
+    window.SpeechRecognition||
     window.webkitSpeechRecognition;
 
-
-  if (!SR) {
+  if(!SR){
 
     throw new Error(
       "Speech recognition unavailable."
     );
   }
 
+  const r=new SR();
 
-  const r =
-    new SR();
+  r.lang="en-US";
+  r.continuous=false;
+  r.interimResults=false;
+  r.maxAlternatives=3;
 
+  r.onstart=()=>{
 
-  r.lang =
-    "en-US";
+    listening=true;
 
-  r.continuous =
-    false;
+    mic.classList.add("on");
 
-  r.interimResults =
-    false;
+    voiceState.textContent=
+      mode==="wake"
+        ?"WAKE LISTEN"
+        :"LISTENING";
 
-  r.maxAlternatives =
-    3;
+    setStatus("LISTENING");
+  };
 
+  r.onerror=e=>{
 
-  r.onstart =
-    () => {
+    console.error(
+      "Speech recognition:",
+      e.error
+    );
 
-      listening =
-        true;
+    stopRecognition();
 
-      mic.classList.add(
-        "on"
+    if(mode==="wake"){
+      scheduleWake();
+    }
+  };
+
+  r.onend=()=>{
+
+    listening=false;
+
+    mic.classList.remove("on");
+
+    voiceState.textContent="READY";
+
+    if(mode==="wake"&&wakeMode){
+
+      scheduleWake();
+    }
+  };
+
+  r.onresult=e=>{
+
+    const heard=
+      e.results[0][0]
+        .transcript
+        .trim();
+
+    console.log("Heard:",heard);
+
+    if(mode==="wake"){
+
+      const m=heard.match(
+        /\bjarvis\b[\s,.:;-]*(.*)$/i
       );
 
-      voiceState.textContent =
-        mode === "wake"
-          ? "WAKE LISTEN"
-          : "LISTENING";
-
-      setStatus(
-        "LISTENING"
-      );
-    };
-
-
-  r.onerror =
-    e => {
-
-      console.error(
-        "Speech recognition:",
-        e.error
-      );
-
-      stopRecognition();
-
-
-      if (
-        mode === "wake"
-      ) {
-
-        scheduleWake();
-      }
-    };
-
-
-  r.onend =
-    () => {
-
-      listening =
-        false;
-
-      mic.classList.remove(
-        "on"
-      );
-
-      voiceState.textContent =
-        "READY";
-
-
-      if (
-        mode === "wake" &&
-        wakeMode
-      ) {
-
-        scheduleWake();
-      }
-    };
-
-
-  r.onresult =
-    e => {
-
-      const heard =
-        e.results[0][0]
-          .transcript
-          .trim();
-
-
-      console.log(
-        "Heard:",
-        heard
-      );
-
-
-      if (
-        mode === "wake"
-      ) {
-
-        const m =
-          heard.match(
-            /\bjarvis\b[\s,.:;-]*(.*)$/i
-          );
-
-
-        if (m) {
-
-          stopRecognition();
-
-
-          const q =
-            m[1].trim();
-
-
-          if (q) {
-
-            /*
-             * Speech has already been
-             * unlocked through the
-             * microphone interaction.
-             */
-
-            ask(q);
-
-          } else {
-
-            listenForCommand();
-          }
-
-
-        } else {
-
-          stopRecognition();
-
-          scheduleWake();
-        }
-
-
-      } else {
+      if(m){
 
         stopRecognition();
 
-        command.value =
-          heard;
+        const q=m[1].trim();
 
-        ask(heard);
+        if(q){
+
+          ask(q);
+
+        }else{
+
+          listenForCommand();
+        }
+
+      }else{
+
+        stopRecognition();
+        scheduleWake();
       }
-    };
 
+    }else{
+
+      stopRecognition();
+
+      command.value=heard;
+
+      ask(heard);
+    }
+  };
 
   return r;
 }
@@ -1585,161 +859,113 @@ function makeRecognition(mode) {
    WAKE WORD
    ========================================================= */
 
-function scheduleWake() {
+function scheduleWake(){
 
-  clearTimeout(
-    wakeRestart
+  clearTimeout(wakeRestart);
+
+  if(!wakeMode) return;
+
+  wakeRestart=setTimeout(
+    startWake,
+    350
   );
-
-
-  if (!wakeMode) {
-    return;
-  }
-
-
-  wakeRestart =
-    setTimeout(
-      startWake,
-      350
-    );
 }
 
 
-function startWake() {
+function startWake(){
 
-  if (!wakeMode) {
-    return;
-  }
+  if(!wakeMode) return;
 
+  try{
 
-  try {
-
-    recognition =
-      makeRecognition(
-        "wake"
-      );
+    recognition=makeRecognition("wake");
 
     recognition.start();
 
-    setWake(
-      "LISTENING"
-    );
+    setWake("LISTENING");
 
+  }catch(e){
 
-  } catch (e) {
+    setWake("TAP MIC");
 
-    setWake(
-      "TAP MIC ONCE"
-    );
-
-    console.error(
-      e
-    );
+    console.error(e);
   }
 }
 
 
-async function enableWake() {
+function listenForCommand(){
 
-  wakeMode =
-    true;
+  try{
 
-  setWake(
-    "REQUESTING"
-  );
+    recognition=makeRecognition("command");
+
+    recognition.start();
+
+  }catch(e){
+
+    console.error(e);
+  }
+}
 
 
-  try {
+/* =========================================================
+   START / STOP JARVIS VOICE MODE
+   ========================================================= */
 
-    await navigator
-      .mediaDevices
-      .getUserMedia({
-        audio: {
-          echoCancellation:
-            true,
+async function activateJarvisVoice(){
 
-          noiseSuppression:
-            true,
+  /*
+   * The MIC button is the important iPhone
+   * user gesture that unlocks speech.
+   */
 
-          autoGainControl:
-            true
-        }
-      });
+  unlockJarvisVoice();
 
+  wakeMode=true;
+
+  setWake("REQUESTING");
+
+  try{
+
+    await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true
+      }
+    });
+
+    setWake("LISTENING");
 
     startWake();
 
+  }catch(e){
 
-  } catch (e) {
+    wakeMode=false;
 
-    wakeMode =
-      false;
+    setWake("MIC BLOCKED");
 
-    setWake(
-      "MIC BLOCKED"
-    );
-
-    response.textContent =
-      "Microphone permission is required for the JARVIS wake word.";
-
-    console.error(
-      e
-    );
-  }
-}
-
-
-function listenForCommand() {
-
-  try {
-
-    recognition =
-      makeRecognition(
-        "command"
-      );
-
-    recognition.start();
-
-  } catch (e) {
-
-    console.error(
-      e
-    );
-  }
-}
-
-
-async function startMic() {
-
-  if (listening) {
-
-    stopRecognition();
-
-    return;
-  }
-
-
-  try {
-
-    await navigator
-      .mediaDevices
-      .getUserMedia({
-        audio: true
-      });
-
-
-    listenForCommand();
-
-
-  } catch (e) {
-
-    response.textContent =
+    response.textContent=
       "Microphone permission is blocked. Allow microphone access for this site.";
 
-    console.error(
-      e
-    );
+    console.error(e);
   }
+}
+
+
+function deactivateJarvisVoice(){
+
+  wakeMode=false;
+
+  clearTimeout(wakeRestart);
+
+  stopRecognition();
+
+  setWake("TAP MIC");
+
+  setStatus("READY");
+
+  voiceState.textContent="READY";
 }
 
 
@@ -1747,45 +973,40 @@ async function startMic() {
    MIC BUTTON
    ========================================================= */
 
-mic.onclick =
-  () => {
+mic.onclick=async()=>{
 
-    /*
-     * MUST happen immediately
-     * from the user's tap.
-     */
+  /*
+   * One physical tap:
+   * 1. unlock speech synthesis
+   * 2. request microphone
+   * 3. activate JARVIS wake listening
+   */
 
-    unlockJarvisVoice();
+  if(wakeMode){
 
-    startMic();
-  };
+    deactivateJarvisVoice();
+
+  }else{
+
+    await activateJarvisVoice();
+  }
+};
 
 
 /* =========================================================
    SEND BUTTON
    ========================================================= */
 
-send.onclick =
-  () => {
+send.onclick=()=>{
 
-    /*
-     * MUST happen immediately
-     * from the user's tap.
-     */
+  unlockJarvisVoice();
 
-    unlockJarvisVoice();
+  const text=command.value;
 
+  command.value="";
 
-    const text =
-      command.value;
-
-
-    command.value =
-      "";
-
-
-    ask(text);
-  };
+  ask(text);
+};
 
 
 /* =========================================================
@@ -1794,22 +1015,15 @@ send.onclick =
 
 command.addEventListener(
   "keydown",
-  e => {
+  e=>{
 
-    if (
-      e.key === "Enter"
-    ) {
+    if(e.key==="Enter"){
 
       unlockJarvisVoice();
 
+      const text=command.value;
 
-      const text =
-        command.value;
-
-
-      command.value =
-        "";
-
+      command.value="";
 
       ask(text);
     }
@@ -1821,124 +1035,79 @@ command.addEventListener(
    ASK JARVIS
    ========================================================= */
 
-async function ask(text) {
+async function ask(text){
 
-  text =
-    (text || "")
-      .trim();
+  text=(text||"").trim();
 
+  if(!text) return;
 
-  if (!text) {
-    return;
-  }
+  response.textContent="Analysing...";
 
+  setStatus("PROCESSING");
 
-  response.textContent =
-    "Analysing...";
+  try{
 
+    const r=await fetch(
+      "/api/chat",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message:text
+        })
+      }
+    );
 
-  setStatus(
-    "PROCESSING"
-  );
+    const d=await r.json().catch(()=>({}));
 
+    if(!r.ok){
 
-  try {
-
-    const r =
-      await fetch(
-        "/api/chat",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify({
-              message: text
-            })
-        }
-      );
-
-
-    const d =
-      await r
-        .json()
-        .catch(
-          () => ({})
-        );
-
-
-    if (!r.ok) {
-
-      const detail =
-        d?.error?.message ||
-        d?.error?.error?.message ||
-        d?.error ||
-        ("HTTP " + r.status);
-
+      const detail=
+        d?.error?.message||
+        d?.error?.error?.message||
+        d?.error||
+        ("HTTP "+r.status);
 
       throw new Error(
-        typeof detail === "string"
-          ? detail
-          : JSON.stringify(detail)
+        typeof detail==="string"
+          ?detail
+          :JSON.stringify(detail)
       );
     }
 
-
-    const answer =
-      d.answer ||
-      d.message ||
+    const answer=
+      d.answer||
+      d.message||
       "I received the request.";
 
+    response.textContent=answer;
+
+    brainState.textContent="ONLINE";
 
     /*
-     * Display response.
-     */
-
-    response.textContent =
-      answer;
-
-
-    brainState.textContent =
-      "ONLINE";
-
-
-    /*
-     * Speak response.
+     * Speak the Gemini answer.
+     *
+     * Speech was already unlocked by
+     * the MIC button or SEND button.
      */
 
     speak(answer);
 
-
-  } catch (e) {
+  }catch(e){
 
     console.error(
       "JARVIS:",
       e
     );
 
+    brainState.textContent="ERROR";
 
-    brainState.textContent =
-      "ERROR";
+    response.textContent=
+      "Brain gateway error: "+e.message;
 
-
-    response.textContent =
-      "Brain gateway error: " +
-      e.message;
-
-
-    setStatus(
-      "BRAIN ERROR"
-    );
-
-
-    /*
-     * Try to speak the error
-     * if speech is available.
-     */
+    setStatus("BRAIN ERROR");
 
     speak(
       "Azwan, the brain gateway returned an error. I have displayed the exact error on screen."
@@ -1951,39 +1120,38 @@ async function ask(text) {
    INITIALIZATION
    ========================================================= */
 
-(async () => {
+(async()=>{
 
-  const ok =
-    await pingBrain();
+  const ok=await pingBrain();
 
+  if(ok){
 
-  if (ok) {
+    response.textContent=
+      'JARVIS brain online. Tap MIC to activate voice.';
 
-    response.textContent =
-      'JARVIS brain online. Say "JARVIS" to wake me.';
-
-
-    setStatus(
-      "READY"
-    );
-
+    setStatus("READY");
 
     /*
-     * Start microphone wake system.
+     * IMPORTANT:
+     *
+     * DO NOT automatically start the microphone here.
+     *
+     * The user must tap MIC first so iPhone/Safari
+     * can unlock speech and microphone access correctly.
      */
 
-    enableWake();
+    wakeMode=false;
 
+    setWake("TAP MIC");
 
-  } else {
+    voiceState.textContent="READY";
 
-    response.textContent =
+  }else{
+
+    response.textContent=
       "JARVIS interface online. Brain gateway needs attention.";
 
-
-    setStatus(
-      "BRAIN ERROR"
-    );
+    setStatus("BRAIN ERROR");
   }
 
 })();
