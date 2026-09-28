@@ -601,8 +601,6 @@ function speak(text){
 
   if(!text) return;
 
-  if(wakeMode) stopRecognition();
-
   try{
 
     speechSynthesis.cancel();
@@ -648,8 +646,6 @@ function speak(text){
           ? "LISTENING"
           : "READY"
       );
-
-      if(wakeMode) scheduleWake();
     };
 
     utterance.onerror=event=>{
@@ -657,8 +653,6 @@ function speak(text){
       speaking=false;
 
       voiceState.textContent="ERROR";
-
-      if(wakeMode) scheduleWake();
 
       console.error(
         "JARVIS speech error:",
@@ -784,15 +778,17 @@ function makeRecognition(mode){
   };
 
   r.onerror=e=>{
-    console.error("Speech recognition:",e.error);
+
+    console.error(
+      "Speech recognition:",
+      e.error
+    );
+
     stopRecognition();
-    if(e.error==="not-allowed"||e.error==="service-not-allowed"){
-      wakeMode=false;
-      setWake("MIC BLOCKED");
-      response.textContent="Speech recognition is blocked. Check Settings > Safari > Microphone, and Settings > General > Keyboard > Enable Dictation.";
-      return;
+
+    if(mode==="wake"){
+      scheduleWake();
     }
-    if(mode==="wake") scheduleWake();
   };
 
   r.onend=()=>{
@@ -818,19 +814,17 @@ function makeRecognition(mode){
 
     console.log("Heard:",heard);
 
-    response.textContent='Heard: "'+heard+'"';
-
     if(mode==="wake"){
 
       const m=heard.match(
-        /\b(jarvis|jervis|travis|jarvas)\b[\s,.:;-]*(.*)$/i
+        /\bjarvis\b[\s,.:;-]*(.*)$/i
       );
 
       if(m){
 
         stopRecognition();
 
-        const q=m[2].trim();
+        const q=m[1].trim();
 
         if(q){
 
@@ -880,7 +874,7 @@ function scheduleWake(){
 
 function startWake(){
 
-  if(!wakeMode||speaking) return;
+  if(!wakeMode) return;
 
   try{
 
@@ -933,8 +927,13 @@ async function activateJarvisVoice(){
 
   try{
 
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    stream.getTracks().forEach(t=>t.stop());
+    await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true
+      }
+    });
 
     setWake("LISTENING");
 
