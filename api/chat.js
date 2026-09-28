@@ -1,6 +1,10 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: {
+        message: "Method not allowed"
+      }
+    });
   }
 
   try {
@@ -8,17 +12,27 @@ export default async function handler(req, res) {
 
     if (!message || typeof message !== "string") {
       return res.status(400).json({
-        error: { message: "Missing message" }
+        error: {
+          message: "Missing message"
+        }
       });
     }
 
-    const apiKey = (process.env.GEMINI_API_KEY || "").trim();
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+    const apiKey = (
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      ""
+    ).trim();
+
+    const model = (
+      process.env.GEMINI_MODEL ||
+      "gemini-3.8-flash"
+    ).trim();
 
     if (!apiKey) {
       return res.status(500).json({
         error: {
-          message: "GEMINI_API_KEY is not configured in this Vercel deployment."
+          message: "JARVIS gateway has no Gemini API key configured."
         }
       });
     }
@@ -26,18 +40,18 @@ export default async function handler(req, res) {
     const system = `
 You are JARVIS AZWAN, Azwan's personal AI assistant.
 
-Identity:
+IDENTITY
 - Your name is JARVIS AZWAN.
 - Address the owner as Azwan.
 - Calm, intelligent, concise and natural.
 - Do not behave like Siri.
 
-Language:
+LANGUAGE
 - If Azwan speaks Malay, answer naturally in Bahasa Malaysia.
 - If Azwan speaks English, answer in English.
 - Use Mandarin when requested.
 
-Behaviour:
+BEHAVIOUR
 - Answer questions naturally.
 - Understand conversation context.
 - Help with work, building maintenance, vendors, reports,
@@ -45,7 +59,7 @@ Behaviour:
 - Do not invent information.
 - Never claim an action was completed unless it was actually executed.
 
-Security:
+SECURITY
 - Never expose API keys or secrets.
 - Financial BUY, SELL, DEPOSIT, WITHDRAW and TRANSFER actions
   require explicit owner approval.
@@ -53,25 +67,38 @@ Security:
 `;
 
     const response = await fetch(
-      \`https://generativelanguage.googleapis.com/v1beta/models/\${encodeURIComponent(model)}:generateContent\`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        model
+      )}:generateContent`,
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": apiKey
         },
+
         body: JSON.stringify({
           systemInstruction: {
-            parts: [{ text: system }]
+            parts: [
+              {
+                text: system
+              }
+            ]
           },
+
           contents: [
             {
               role: "user",
-              parts: [{ text: message }]
+              parts: [
+                {
+                  text: message
+                }
+              ]
             }
           ],
+
           generationConfig: {
-            temperature: 0.4,
             maxOutputTokens: 1500
           }
         })
@@ -81,10 +108,13 @@ Security:
     const raw = await response.text();
 
     let data;
+
     try {
       data = JSON.parse(raw);
     } catch {
-      data = { raw };
+      data = {
+        raw
+      };
     }
 
     if (!response.ok) {
@@ -92,25 +122,36 @@ Security:
         data?.error?.message ||
         data?.message ||
         data?.raw ||
-        \`Gemini API returned HTTP \${response.status}\`;
+        `Gemini API returned HTTP ${response.status}`;
 
-      console.error("Gemini API error:", response.status, upstream);
+      console.error(
+        "Gemini API error:",
+        response.status,
+        upstream
+      );
 
       return res.status(502).json({
         error: {
-          message: \`Gemini API error \${response.status}: \${upstream}\`
+          message: `Gemini API error ${response.status}: ${upstream}`
         }
       });
     }
 
     const answer =
       data?.candidates?.[0]?.content?.parts
-        ?.filter(part => typeof part?.text === "string")
-        ?.map(part => part.text)
+        ?.filter(
+          part => typeof part?.text === "string"
+        )
+        ?.map(
+          part => part.text
+        )
         ?.join("") || "";
 
     if (!answer) {
-      console.error("Unexpected Gemini response:", data);
+      console.error(
+        "Unexpected Gemini response:",
+        data
+      );
 
       return res.status(502).json({
         error: {
@@ -119,14 +160,22 @@ Security:
       });
     }
 
-    return res.status(200).json({ answer });
+    return res.status(200).json({
+      answer
+    });
 
   } catch (error) {
-    console.error("JARVIS gateway exception:", error);
+    console.error(
+      "JARVIS gateway exception:",
+      error
+    );
 
-    return res.status(500).json({
+    return res.status(502).json({
       error: {
-        message: \`JARVIS gateway exception: \${error?.message || "Unknown error"}\`
+        message:
+          `JARVIS gateway exception: ${
+            error?.message || "Unknown error"
+          }`
       }
     });
   }
