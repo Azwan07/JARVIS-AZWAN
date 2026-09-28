@@ -1,9 +1,7 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: {
-        message: "Method not allowed"
-      }
+      error: { message: "Method not allowed" }
     });
   }
 
@@ -12,9 +10,7 @@ export default async function handler(req, res) {
 
     if (!message || typeof message !== "string") {
       return res.status(400).json({
-        error: {
-          message: "Missing message"
-        }
+        error: { message: "Missing message" }
       });
     }
 
@@ -24,34 +20,21 @@ export default async function handler(req, res) {
       ""
     ).trim();
 
-    if (!apiKey) {
-      return res.status(500).json({
-        error: {
-          message:
-            "JARVIS gateway has no Gemini API key configured."
-        }
-      });
-    }
-
-    const preferredModel = (
+    const primaryModel = (
       process.env.GEMINI_MODEL ||
       "gemini-3.8-flash"
     ).trim();
 
-    /*
-     * Primary model first.
-     * If Google returns temporary capacity errors,
-     * automatically try the next available model.
-     */
-    const models = [
-      preferredModel,
-      "gemini-3.7-flash",
-      "gemini-3.6-flash",
-      "gemini-3.5-flash-lite"
-    ].filter(
-      (model, index, array) =>
-        array.indexOf(model) === index
-    );
+    const fallbackModel = (
+      process.env.GEMINI_FALLBACK_MODEL ||
+      "gemini-2.5-flash"
+    ).trim();
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: { message: "JARVIS gateway has no Gemini API key configured." }
+      });
+    }
 
     const system = `
 You are JARVIS AZWAN, Azwan's personal AI assistant.
@@ -82,201 +65,97 @@ SECURITY
 - Never infer financial approval from ambiguous language.
 `;
 
-    let lastError = null;
+    const body = JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents: [{ role: "user", parts: [{ text: message }] }],
+      generationConfig: { maxOutputTokens: 1500 }
+    });
 
-    for (const model of models) {
+    async function callGemini(model) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body
+        }
+      );
 
-      /*
-       * Try the model.
-       */
-      let response;
-
-      try {
-
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-            model
-          )}:generateContent`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey
-            },
-
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [
-                  {
-                    text: system
-                  }
-                ]
-              },
-
-              contents: [
-                {
-                  role: "user",
-                  parts: [
-                    {
-                      text: message
-                    }
-                  ]
-                }
-              ],
-
-              generationConfig: {
-                maxOutputTokens: 1500
-              }
-            })
-          }
-        );
-
-      } catch (networkError) {
-
-        lastError = networkError;
-
-        console.error(
-          "Gemini network error:",
-          model,
-          networkError
-        );
-
-        continue;
-      }
-
-
-      const raw =
-        await response.text();
-
+      const raw = await response.text();
       let data;
-
       try {
         data = JSON.parse(raw);
       } catch {
-        data = {
-          raw
-        };
+        data = { raw };
       }
+      return { response, data };
+    }
 
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const RETRY_STATUS = [429, 500, 503, 504];
 
-      /*
-       * SUCCESS
-       */
-      if (response.ok) {
+    // Try primary model twice, then the fallback model once.
+    const plan = [primaryModel, primaryModel, fallbackModel];
 
-        const answer =
-          data?.candidates?.[0]?.content?.parts
-            ?.filter(
-              part =>
-                typeof part?.text === "string"
-            )
-            ?.map(
-              part => part.text
-            )
-            ?.join("") || "";
+    let last = null;
+    let usedModel = primaryModel;
 
+    for (let i = 0; i < plan.length; i++) {
+      usedModel = plan[i];
+      last = await callGemini(usedModel);
 
-        if (answer) {
+      if (last.response.ok) break;
 
-          console.log(
-            "JARVIS Gemini model:",
-            model
-          );
+      console.error(
+        "Gemini API error:",
+        usedModel,
+        last.response.status
+      );
 
-          return res.status(200).json({
-            answer,
-            model
-          });
-        }
+      if (!RETRY_STATUS.includes(last.response.status)) break;
 
+      if (i < plan.length - 1) await wait(700);
+    }
 
-        lastError =
-          new Error(
-            "Gemini returned no assistant message."
-          );
+    const { response, data } = last;
 
-        continue;
-      }
-
-
+    if (!response.ok) {
       const upstream =
         data?.error?.message ||
         data?.message ||
         data?.raw ||
         `Gemini API returned HTTP ${response.status}`;
 
-
-      lastError =
-        new Error(
-          `Gemini API error ${response.status}: ${upstream}`
-        );
-
-
-      console.error(
-        "Gemini API error:",
-        model,
-        response.status,
-        upstream
-      );
-
-
-      /*
-       * 503 = temporary overload.
-       * 429 = rate/capacity limit.
-       *
-       * Automatically try another model.
-       */
-      if (
-        response.status === 503 ||
-        response.status === 429
-      ) {
-
-        continue;
-      }
-
-
-      /*
-       * Other errors are normally configuration,
-       * authentication, request, or permission
-       * problems. Don't hide them behind another
-       * model attempt.
-       */
       return res.status(502).json({
         error: {
-          message:
-            `Gemini API error ${response.status}: ${upstream}`
+          message: `Gemini API error ${response.status} (${usedModel}): ${upstream}`
         }
       });
     }
 
+    const answer =
+      data?.candidates?.[0]?.content?.parts
+        ?.filter(part => typeof part?.text === "string")
+        ?.map(part => part.text)
+        ?.join("") || "";
 
-    /*
-     * Every fallback model failed.
-     */
-    return res.status(503).json({
-      error: {
-        message:
-          lastError?.message ||
-          "All Gemini models are temporarily unavailable."
-      }
-    });
+    if (!answer) {
+      console.error("Unexpected Gemini response:", data);
+      return res.status(502).json({
+        error: { message: "Gemini returned no assistant message." }
+      });
+    }
 
+    return res.status(200).json({ answer });
 
   } catch (error) {
-
-    console.error(
-      "JARVIS gateway exception:",
-      error
-    );
-
+    console.error("JARVIS gateway exception:", error);
     return res.status(502).json({
       error: {
-        message:
-          `JARVIS gateway exception: ${
-            error?.message ||
-            "Unknown error"
-          }`
+        message: `JARVIS gateway exception: ${error?.message || "Unknown error"}`
       }
     });
   }
