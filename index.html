@@ -779,6 +779,9 @@ function makeRecognition(mode){
 
   r.onerror=e=>{
 
+    r._err=true;
+    response.textContent="Mic error: "+e.error;
+
     console.error(
       "Speech recognition:",
       e.error
@@ -792,6 +795,10 @@ function makeRecognition(mode){
   };
 
   r.onend=()=>{
+
+    if(mode==="command"&&!r._got&&!r._err){
+      response.textContent="I did not hear anything. Tap MIC and speak.";
+    }
 
     listening=false;
 
@@ -813,6 +820,8 @@ function makeRecognition(mode){
         .trim();
 
     console.log("Heard:",heard);
+
+    r._got=true;
 
     if(mode==="wake"){
 
@@ -973,22 +982,26 @@ function deactivateJarvisVoice(){
    MIC BUTTON
    ========================================================= */
 
-mic.onclick=async()=>{
+mic.onclick=()=>{
 
-  /*
-   * One physical tap:
-   * 1. unlock speech synthesis
-   * 2. request microphone
-   * 3. activate JARVIS wake listening
-   */
+  /* MIC = talk once. No wake word needed. */
 
-  if(wakeMode){
+  unlockJarvisVoice();
 
-    deactivateJarvisVoice();
+  wakeMode=false;
+  clearTimeout(wakeRestart);
+  stopRecognition();
 
-  }else{
+  try{
 
-    await activateJarvisVoice();
+    recognition=makeRecognition("command");
+    recognition.start();
+
+    response.textContent="Listening... speak now.";
+
+  }catch(e){
+
+    response.textContent="Voice failed: "+e.message;
   }
 };
 
