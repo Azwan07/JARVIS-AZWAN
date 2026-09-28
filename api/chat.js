@@ -1,7 +1,9 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: { message: "Method not allowed" }
+      error: {
+        message: "Method not allowed"
+      }
     });
   }
 
@@ -10,7 +12,9 @@ export default async function handler(req, res) {
 
     if (!message || typeof message !== "string") {
       return res.status(400).json({
-        error: { message: "Missing message" }
+        error: {
+          message: "Missing message"
+        }
       });
     }
 
@@ -20,19 +24,16 @@ export default async function handler(req, res) {
       ""
     ).trim();
 
-    const primaryModel = (
+    const model = (
       process.env.GEMINI_MODEL ||
       "gemini-3.8-flash"
     ).trim();
 
-    const fallbackModel = (
-      process.env.GEMINI_FALLBACK_MODEL ||
-      "gemini-2.5-flash"
-    ).trim();
-
     if (!apiKey) {
       return res.status(500).json({
-        error: { message: "JARVIS gateway has no Gemini API key configured." }
+        error: {
+          message: "JARVIS gateway has no Gemini API key configured."
+        }
       });
     }
 
@@ -65,62 +66,56 @@ SECURITY
 - Never infer financial approval from ambiguous language.
 `;
 
-    const body = JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: "user", parts: [{ text: message }] }],
-      generationConfig: { maxOutputTokens: 1500 }
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        model
+      )}:generateContent`,
+      {
+        method: "POST",
 
-    async function callGemini(model) {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [
+              {
+                text: system
+              }
+            ]
           },
-          body
-        }
-      );
 
-      const raw = await response.text();
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        data = { raw };
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: message
+                }
+              ]
+            }
+          ],
+
+          generationConfig: {
+            maxOutputTokens: 1500
+          }
+        })
       }
-      return { response, data };
+    );
+
+    const raw = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = {
+        raw
+      };
     }
-
-    const wait = ms => new Promise(r => setTimeout(r, ms));
-    const RETRY_STATUS = [429, 500, 503, 504];
-
-    // Try primary model twice, then the fallback model once.
-    const plan = [primaryModel, primaryModel, fallbackModel];
-
-    let last = null;
-    let usedModel = primaryModel;
-
-    for (let i = 0; i < plan.length; i++) {
-      usedModel = plan[i];
-      last = await callGemini(usedModel);
-
-      if (last.response.ok) break;
-
-      console.error(
-        "Gemini API error:",
-        usedModel,
-        last.response.status
-      );
-
-      if (!RETRY_STATUS.includes(last.response.status)) break;
-
-      if (i < plan.length - 1) await wait(700);
-    }
-
-    const { response, data } = last;
 
     if (!response.ok) {
       const upstream =
@@ -129,33 +124,58 @@ SECURITY
         data?.raw ||
         `Gemini API returned HTTP ${response.status}`;
 
+      console.error(
+        "Gemini API error:",
+        response.status,
+        upstream
+      );
+
       return res.status(502).json({
         error: {
-          message: `Gemini API error ${response.status} (${usedModel}): ${upstream}`
+          message: `Gemini API error ${response.status}: ${upstream}`
         }
       });
     }
 
     const answer =
       data?.candidates?.[0]?.content?.parts
-        ?.filter(part => typeof part?.text === "string")
-        ?.map(part => part.text)
+        ?.filter(
+          part => typeof part?.text === "string"
+        )
+        ?.map(
+          part => part.text
+        )
         ?.join("") || "";
 
     if (!answer) {
-      console.error("Unexpected Gemini response:", data);
+      console.error(
+        "Unexpected Gemini response:",
+        data
+      );
+
       return res.status(502).json({
-        error: { message: "Gemini returned no assistant message." }
+        error: {
+          message: "Gemini returned no assistant message."
+        }
       });
     }
 
-    return res.status(200).json({ answer });
+    return res.status(200).json({
+      answer
+    });
 
   } catch (error) {
-    console.error("JARVIS gateway exception:", error);
+    console.error(
+      "JARVIS gateway exception:",
+      error
+    );
+
     return res.status(502).json({
       error: {
-        message: `JARVIS gateway exception: ${error?.message || "Unknown error"}`
+        message:
+          `JARVIS gateway exception: ${
+            error?.message || "Unknown error"
+          }`
       }
     });
   }
