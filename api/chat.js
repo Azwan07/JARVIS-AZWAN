@@ -24,18 +24,34 @@ export default async function handler(req, res) {
       ""
     ).trim();
 
-    const model = (
+    if (!apiKey) {
+      return res.status(500).json({
+        error: {
+          message:
+            "JARVIS gateway has no Gemini API key configured."
+        }
+      });
+    }
+
+    const preferredModel = (
       process.env.GEMINI_MODEL ||
       "gemini-3.8-flash"
     ).trim();
 
-    if (!apiKey) {
-      return res.status(500).json({
-        error: {
-          message: "JARVIS gateway has no Gemini API key configured."
-        }
-      });
-    }
+    /*
+     * Primary model first.
+     * If Google returns temporary capacity errors,
+     * automatically try the next available model.
+     */
+    const models = [
+      preferredModel,
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.5-flash-lite"
+    ].filter(
+      (model, index, array) =>
+        array.indexOf(model) === index
+    );
 
     const system = `
 You are JARVIS AZWAN, Azwan's personal AI assistant.
@@ -66,105 +82,189 @@ SECURITY
 - Never infer financial approval from ambiguous language.
 `;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        model
-      )}:generateContent`,
-      {
-        method: "POST",
+    let lastError = null;
 
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
+    for (const model of models) {
 
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: system
-              }
-            ]
-          },
+      /*
+       * Try the model.
+       */
+      let response;
 
-          contents: [
-            {
-              role: "user",
-              parts: [
+      try {
+
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+            model
+          )}:generateContent`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKey
+            },
+
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [
+                  {
+                    text: system
+                  }
+                ]
+              },
+
+              contents: [
                 {
-                  text: message
+                  role: "user",
+                  parts: [
+                    {
+                      text: message
+                    }
+                  ]
                 }
-              ]
-            }
-          ],
+              ],
 
-          generationConfig: {
-            maxOutputTokens: 1500
+              generationConfig: {
+                maxOutputTokens: 1500
+              }
+            })
           }
-        })
+        );
+
+      } catch (networkError) {
+
+        lastError = networkError;
+
+        console.error(
+          "Gemini network error:",
+          model,
+          networkError
+        );
+
+        continue;
       }
-    );
 
-    const raw = await response.text();
 
-    let data;
+      const raw =
+        await response.text();
 
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      data = {
-        raw
-      };
-    }
+      let data;
 
-    if (!response.ok) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        data = {
+          raw
+        };
+      }
+
+
+      /*
+       * SUCCESS
+       */
+      if (response.ok) {
+
+        const answer =
+          data?.candidates?.[0]?.content?.parts
+            ?.filter(
+              part =>
+                typeof part?.text === "string"
+            )
+            ?.map(
+              part => part.text
+            )
+            ?.join("") || "";
+
+
+        if (answer) {
+
+          console.log(
+            "JARVIS Gemini model:",
+            model
+          );
+
+          return res.status(200).json({
+            answer,
+            model
+          });
+        }
+
+
+        lastError =
+          new Error(
+            "Gemini returned no assistant message."
+          );
+
+        continue;
+      }
+
+
       const upstream =
         data?.error?.message ||
         data?.message ||
         data?.raw ||
         `Gemini API returned HTTP ${response.status}`;
 
+
+      lastError =
+        new Error(
+          `Gemini API error ${response.status}: ${upstream}`
+        );
+
+
       console.error(
         "Gemini API error:",
+        model,
         response.status,
         upstream
       );
 
+
+      /*
+       * 503 = temporary overload.
+       * 429 = rate/capacity limit.
+       *
+       * Automatically try another model.
+       */
+      if (
+        response.status === 503 ||
+        response.status === 429
+      ) {
+
+        continue;
+      }
+
+
+      /*
+       * Other errors are normally configuration,
+       * authentication, request, or permission
+       * problems. Don't hide them behind another
+       * model attempt.
+       */
       return res.status(502).json({
         error: {
-          message: `Gemini API error ${response.status}: ${upstream}`
+          message:
+            `Gemini API error ${response.status}: ${upstream}`
         }
       });
     }
 
-    const answer =
-      data?.candidates?.[0]?.content?.parts
-        ?.filter(
-          part => typeof part?.text === "string"
-        )
-        ?.map(
-          part => part.text
-        )
-        ?.join("") || "";
 
-    if (!answer) {
-      console.error(
-        "Unexpected Gemini response:",
-        data
-      );
-
-      return res.status(502).json({
-        error: {
-          message: "Gemini returned no assistant message."
-        }
-      });
-    }
-
-    return res.status(200).json({
-      answer
+    /*
+     * Every fallback model failed.
+     */
+    return res.status(503).json({
+      error: {
+        message:
+          lastError?.message ||
+          "All Gemini models are temporarily unavailable."
+      }
     });
 
+
   } catch (error) {
+
     console.error(
       "JARVIS gateway exception:",
       error
@@ -174,7 +274,8 @@ SECURITY
       error: {
         message:
           `JARVIS gateway exception: ${
-            error?.message || "Unknown error"
+            error?.message ||
+            "Unknown error"
           }`
       }
     });
