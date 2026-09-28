@@ -818,6 +818,8 @@ function makeRecognition(mode){
 
     console.log("Heard:",heard);
 
+    response.textContent='Heard: "'+heard+'"';
+
     if(mode==="wake"){
 
       const m=heard.match(
